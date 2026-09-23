@@ -20,7 +20,14 @@ public final class AxiomClient implements ClientModInitializer {
     public static final AutoBuilder BUILDER = new AutoBuilder();
     public static final BuildHud HUD = new BuildHud();
     private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(Identifier.fromNamespaceAndPath(MOD_ID, "controls"));
-    private KeyMapping menu, build, pause, origin, rotate, cancel;
+    private static KeyMapping menu, build, pause, origin, rotate, cancel;
+
+    public static KeyMapping menuKey() { return menu; }
+    public static KeyMapping buildKey() { return build; }
+    public static KeyMapping pauseKey() { return pause; }
+    public static KeyMapping originKey() { return origin; }
+    public static KeyMapping rotateKey() { return rotate; }
+    public static KeyMapping cancelKey() { return cancel; }
 
     @Override public void onInitializeClient() {
         CONFIG.load();
