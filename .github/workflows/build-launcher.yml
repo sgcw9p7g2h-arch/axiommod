@@ -1,0 +1,36 @@
+name: Build Axiom Launcher
+
+on:
+  push:
+    paths:
+      - 'launcher/**'
+      - '.github/workflows/build-launcher.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: launcher/AxiomLauncher
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Publish
+        run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o ../../launcher-dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: axiom-launcher-win-x64
+          path: launcher-dist/**
+          if-no-files-found: error
