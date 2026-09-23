@@ -60,6 +60,10 @@ public final class AxiomConfigScreen extends Screen {
                 .bounds(x, y += 35, 310, 20).build());
     }
 
+    private String keyLabel(KeyMapping mapping) {
+        return mapping.getTranslatedKeyMessage().getString();
+    }
+
     private Button keyButton(String label, KeyMapping mapping, int x, int y) {
         return Button.builder(Component.literal(label + ": " + mapping.getTranslatedKeyMessage().getString()), b -> {
             waitingFor = mapping;
@@ -74,11 +78,14 @@ public final class AxiomConfigScreen extends Screen {
             if (code == 256) {
                 waitingFor.setKey(InputConstants.UNKNOWN);
             } else {
-                waitingFor.setKey(InputConstants.getKey(code, key.scancode()));
+                waitingFor.setKey(InputConstants.getKey(key));
             }
             minecraft.options.save();
+            if (waitingButton != null) {
+                waitingButton.setMessage(Component.literal(keyLabel(waitingFor)));
+            }
             waitingFor = null;
-            rebuildWidgets();
+            waitingButton = null;
             return true;
         }
         if (key.key() == 256) {
