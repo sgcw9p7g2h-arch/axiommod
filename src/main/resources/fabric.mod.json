@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "axiom",
+  "version": "${version}",
+  "name": "Axiom",
+  "description": "Client-side schematic building and utility mod for Minecraft Java 1.21.11.",
+  "authors": ["Axiom"],
+  "icon": "icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["axiom.client.AxiomClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.18.1",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}

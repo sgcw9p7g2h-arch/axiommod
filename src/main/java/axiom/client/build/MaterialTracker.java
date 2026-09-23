@@ -1,0 +1,7 @@
+package axiom.client.build;
+import net.minecraft.client.player.LocalPlayer; import net.minecraft.core.Holder; import net.minecraft.core.registries.BuiltInRegistries; import net.minecraft.resources.Identifier; import net.minecraft.world.level.block.Block; import net.minecraft.world.item.BlockItem; import java.util.*;
+public final class MaterialTracker { private final Map<String,Integer> required=new HashMap<>(),available=new HashMap<>(); public void clear(){required.clear();available.clear();} public void require(String id){required.merge(id,1,Integer::sum);}
+ public void scan(LocalPlayer p){available.clear();for(int i=0;i<p.getInventory().getContainerSize();i++){var s=p.getInventory().getItem(i);if(!s.isEmpty()&&s.getItem() instanceof BlockItem)available.merge(BuiltInRegistries.ITEM.getKey(s.getItem()).toString(),s.getCount(),Integer::sum);}}
+ public int missingFor(String blockId){String base=blockId; int bracket=base.indexOf('['); if(bracket>=0) base=base.substring(0,bracket); Block block; try { block=BuiltInRegistries.BLOCK.get(Identifier.parse(base)).map(Holder::value).orElse(null); } catch (IllegalArgumentException e) { return 0; } if(block==null||!(block.asItem() instanceof BlockItem item))return 0; String id=BuiltInRegistries.ITEM.getKey(item).toString(); return Math.max(0,required.getOrDefault(blockId,0)-available.getOrDefault(id,0));}
+ public Map<String,Integer> required(){return Collections.unmodifiableMap(required);}
+}

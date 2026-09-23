@@ -1,0 +1,9 @@
+{
+  "key.axiom.open_browser": "Open Axiom schematic browser",
+  "key.axiom.build": "Start / pause Axiom build",
+  "key.axiom.pause": "Pause / resume Axiom build",
+  "key.axiom.origin": "Choose Axiom build origin",
+  "key.axiom.rotate": "Rotate Axiom schematic",
+  "key.axiom.cancel": "Cancel Axiom build",
+  "key.category.axiom.controls": "Axiom"
+}
