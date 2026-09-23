@@ -1,0 +1,11 @@
+<Application x:Class="AxiomLauncher.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Application.Resources>
+    <SolidColorBrush x:Key="AxiomBackground" Color="#0D0F12"/>
+    <SolidColorBrush x:Key="AxiomPanel" Color="#15181D"/>
+    <SolidColorBrush x:Key="AxiomText" Color="#F3F4F6"/>
+    <SolidColorBrush x:Key="AxiomMuted" Color="#8B93A1"/>
+    <SolidColorBrush x:Key="AxiomAccent" Color="#FFFFFF"/>
+  </Application.Resources>
+</Application>
