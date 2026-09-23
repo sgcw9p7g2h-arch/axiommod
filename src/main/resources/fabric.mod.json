@@ -8,7 +8,8 @@
   "icon": "icon.png",
   "environment": "client",
   "entrypoints": {
-    "client": ["axiom.client.AxiomClient"]
+    "client": ["axiom.client.AxiomClient"],
+    "modmenu": ["axiom.client.ui.ModMenuIntegration"]
   },
   "depends": {
     "fabricloader": ">=0.18.1",
