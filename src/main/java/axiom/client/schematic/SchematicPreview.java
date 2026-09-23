@@ -29,7 +29,7 @@ public final class SchematicPreview {
 
         var matrices = context.matrices();
         var camera = context.gameRenderer().getMainCamera();
-        Vec3 cameraPos = camera.getPosition();
+        Vec3 cameraPos = camera.position();
         List<SchematicBlock> blocks = AxiomClient.SCHEMATICS.selected().transformedBlocks();
         var origin = AxiomClient.BUILDER.origin();
 
@@ -82,3 +82,4 @@ public final class SchematicPreview {
         consumer.addVertex(pose, x2, y2, z2).setColor(r, g, b, a);
     }
 }
+
