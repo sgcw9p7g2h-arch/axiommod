@@ -12,6 +12,12 @@ base {
 
 repositories {
     // Loom provides the Minecraft/Fabric repositories required by this project.
+    exclusiveContent {
+        forRepository {
+            maven { name = "Modrinth"; url = "https://api.modrinth.com/maven" }
+        }
+        filter { includeGroup "maven.modrinth" }
+    }
 }
 
 dependencies {
@@ -19,6 +25,8 @@ dependencies {
     mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+    // Optional at runtime: only used when Mod Menu is installed.
+    modCompileOnly "maven.modrinth:mOgUt4GM:Tyk71iSw"
 }
 
 processResources {
