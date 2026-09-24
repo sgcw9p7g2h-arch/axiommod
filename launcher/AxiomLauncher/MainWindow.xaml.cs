@@ -6,7 +6,6 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using System.Linq;
 using System.Windows;
-using System.Windows.Forms;
 using CmlLib.Core;
 using CmlLib.Core.Auth;
 using CmlLib.Core.Auth.Microsoft;
