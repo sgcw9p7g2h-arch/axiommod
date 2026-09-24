@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text.Json;
 using System.Windows;
 using CmlLib.Core;
 using CmlLib.Core.Auth;
@@ -13,6 +14,7 @@ public partial class MainWindow : Window
     private MinecraftLauncher? _launcher;
     private MSession? _session;
     private readonly JELoginHandler _loginHandler = JELoginHandlerBuilder.BuildDefault();
+    private readonly string _settingsFile;
 
     public MainWindow()
     {
@@ -23,6 +25,8 @@ public partial class MainWindow : Window
             ".axiom");
 
         GameDirBox.Text = gameDir;
+        _settingsFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Axiom", "launcher-settings.json");
+        LoadSettings();
     }
 
     private async void LoginButton_Click(object sender, RoutedEventArgs e)
@@ -65,6 +69,8 @@ public partial class MainWindow : Window
 
         try
         {
+            SaveSettings();
+
             var path = new MinecraftPath(GameDirBox.Text);
             _launcher = new MinecraftLauncher(path);
 
@@ -76,7 +82,7 @@ public partial class MainWindow : Window
             var options = new MLaunchOption
             {
                 Session = _session,
-                MaximumRamMb = 4096
+                MaximumRamMb = GetSelectedRamMb()
             };
 
             var process = await _launcher.BuildProcessAsync(version, options);
@@ -97,10 +103,80 @@ public partial class MainWindow : Window
         }
     }
 
+    private int GetSelectedRamMb()
+    {
+        return RamBox.SelectedIndex switch
+        {
+            0 => 2048,
+            1 => 4096,
+            2 => 6144,
+            3 => 8192,
+            _ => 4096
+        };
+    }
+
+    private void LoadSettings()
+    {
+        try
+        {
+            if (!File.Exists(_settingsFile))
+                return;
+
+            var settings = JsonSerializer.Deserialize<LauncherSettings>(File.ReadAllText(_settingsFile));
+            if (settings == null)
+                return;
+
+            if (!string.IsNullOrWhiteSpace(settings.GameDirectory))
+                GameDirBox.Text = settings.GameDirectory;
+
+            RamBox.SelectedIndex = settings.RamMb switch
+            {
+                2048 => 0,
+                4096 => 1,
+                6144 => 2,
+                8192 => 3,
+                _ => 1
+            };
+        }
+        catch
+        {
+            // A corrupt settings file should never prevent the launcher from opening.
+        }
+    }
+
+    private void SaveSettings()
+    {
+        try
+        {
+            var directory = Path.GetDirectoryName(_settingsFile);
+            if (!string.IsNullOrEmpty(directory))
+                Directory.CreateDirectory(directory);
+
+            var settings = new LauncherSettings
+            {
+                GameDirectory = GameDirBox.Text,
+                RamMb = GetSelectedRamMb()
+            };
+
+            File.WriteAllText(_settingsFile, JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true }));
+        }
+        catch
+        {
+            // Settings persistence is non-critical to launching.
+        }
+    }
+
+    private sealed class LauncherSettings
+    {
+        public string GameDirectory { get; set; } = string.Empty;
+        public int RamMb { get; set; } = 4096;
+    }
+
     private void SettingsButton_Click(object sender, RoutedEventArgs e)
     {
+        SaveSettings();
         MessageBox.Show(
-            "Axiom settings will control RAM, Java, profiles, updates, and the game directory.",
+            "Your Axiom game directory and RAM setting are saved automatically.",
             "Axiom Launcher");
     }
 }
