@@ -26,6 +26,7 @@
             <Grid.RowDefinitions>
               <RowDefinition Height="Auto"/>
               <RowDefinition Height="Auto"/>
+              <RowDefinition Height="Auto"/>
               <RowDefinition Height="*"/>
               <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
@@ -47,7 +48,7 @@
               <TextBox x:Name="GameDirBox" Margin="0,8,0,0" Height="38"/>
               <TextBlock x:Name="AccountText" Text="Not signed in" Foreground="{StaticResource AxiomMuted}" Margin="0,14,0,0"/>
             </StackPanel>
-            <Button Grid.Row="3" x:Name="LaunchButton" Content="LAUNCH AXIOM" Height="52" FontSize="16" FontWeight="Bold" Click="LaunchButton_Click"/>
+            <Button Grid.Row="4" x:Name="LaunchButton" Content="LAUNCH AXIOM" Height="52" FontSize="16" FontWeight="Bold" Click="LaunchButton_Click"/>
           </Grid>
         </Border>
       </TabItem>
