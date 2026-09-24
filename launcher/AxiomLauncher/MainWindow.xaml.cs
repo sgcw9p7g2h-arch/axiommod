@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text.Json;
+using System.Linq;
 using System.Windows;
 using CmlLib.Core;
 using CmlLib.Core.Auth;
@@ -26,6 +27,11 @@ public partial class MainWindow : Window
     private readonly JELoginHandler _loginHandler = JELoginHandlerBuilder.BuildDefault();
     private readonly HttpClient _httpClient = new();
     private readonly string _settingsFile;
+    private const int MaxProfiles = 5;
+    private readonly LauncherProfile[] _profiles = Enumerable.Range(1, MaxProfiles)
+        .Select(i => new LauncherProfile { Name = $"Profile {i}" })
+        .ToArray();
+    private int _selectedProfileIndex;
 
     public MainWindow()
     {
@@ -37,6 +43,7 @@ public partial class MainWindow : Window
         GameDirBox.Text = gameDir;
         _settingsFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Axiom", "launcher-settings.json");
         VersionBox.SelectedIndex = 0;
+        InitializeProfiles();
         LoadSettings();
     }
 
@@ -89,6 +96,7 @@ public partial class MainWindow : Window
         try
         {
             SaveSettings();
+            SaveCurrentProfile();
             var path = new MinecraftPath(GameDirBox.Text);
             _launcher = new MinecraftLauncher(path);
 
@@ -208,6 +216,40 @@ public partial class MainWindow : Window
         0 => 2048, 1 => 4096, 2 => 6144, 3 => 8192, _ => 4096
     };
 
+    private void InitializeProfiles()
+    {
+        ProfileBox.Items.Clear();
+        for (var i = 0; i < MaxProfiles; i++)
+            ProfileBox.Items.Add(_profiles[i].Name);
+        ProfileBox.SelectedIndex = 0;
+    }
+
+    private void ProfileBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    {
+        if (!IsLoaded || ProfileBox.SelectedIndex < 0 || ProfileBox.SelectedIndex >= MaxProfiles) return;
+        SaveCurrentProfile();
+        _selectedProfileIndex = ProfileBox.SelectedIndex;
+        var profile = _profiles[_selectedProfileIndex];
+        GameDirBox.Text = profile.GameDirectory;
+        RamBox.SelectedIndex = profile.RamMb switch { 2048 => 0, 4096 => 1, 6144 => 2, 8192 => 3, _ => 1 };
+    }
+
+    private void SaveProfileButton_Click(object sender, RoutedEventArgs e)
+    {
+        SaveCurrentProfile();
+        SaveSettings();
+        StatusText.Text = $"{_profiles[_selectedProfileIndex].Name} saved.";
+    }
+
+    private void SaveCurrentProfile()
+    {
+        if (ProfileBox.SelectedIndex < 0 || ProfileBox.SelectedIndex >= MaxProfiles) return;
+        _selectedProfileIndex = ProfileBox.SelectedIndex;
+        var profile = _profiles[_selectedProfileIndex];
+        profile.GameDirectory = GameDirBox.Text;
+        profile.RamMb = GetSelectedRamMb();
+    }
+
     private void LoadSettings()
     {
         try
@@ -215,8 +257,19 @@ public partial class MainWindow : Window
             if (!File.Exists(_settingsFile)) return;
             var settings = JsonSerializer.Deserialize<LauncherSettings>(File.ReadAllText(_settingsFile));
             if (settings == null) return;
-            if (!string.IsNullOrWhiteSpace(settings.GameDirectory)) GameDirBox.Text = settings.GameDirectory;
-            RamBox.SelectedIndex = settings.RamMb switch { 2048 => 0, 4096 => 1, 6144 => 2, 8192 => 3, _ => 1 };
+            if (settings.Profiles?.Length == MaxProfiles)
+            {
+                for (var i = 0; i < MaxProfiles; i++)
+                {
+                    _profiles[i] = settings.Profiles[i];
+                    ProfileBox.Items[i] = _profiles[i].Name;
+                }
+            }
+            _selectedProfileIndex = Math.Clamp(settings.SelectedProfile, 0, MaxProfiles - 1);
+            ProfileBox.SelectedIndex = _selectedProfileIndex;
+            var selected = _profiles[_selectedProfileIndex];
+            GameDirBox.Text = selected.GameDirectory;
+            RamBox.SelectedIndex = selected.RamMb switch { 2048 => 0, 4096 => 1, 6144 => 2, 8192 => 3, _ => 1 };
         }
         catch { }
     }
@@ -227,7 +280,8 @@ public partial class MainWindow : Window
         {
             var directory = Path.GetDirectoryName(_settingsFile);
             if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
-            var settings = new LauncherSettings { GameDirectory = GameDirBox.Text, RamMb = GetSelectedRamMb() };
+            SaveCurrentProfile();
+            var settings = new LauncherSettings { Profiles = _profiles, SelectedProfile = _selectedProfileIndex };
             File.WriteAllText(_settingsFile, JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true }));
         }
         catch { }
@@ -235,8 +289,16 @@ public partial class MainWindow : Window
 
     private sealed class LauncherSettings
     {
+        public LauncherProfile[] Profiles { get; set; } = Array.Empty<LauncherProfile>();
+        public int SelectedProfile { get; set; }
+    }
+
+    private sealed class LauncherProfile
+    {
+        public string Name { get; set; } = "Profile";
         public string GameDirectory { get; set; } = string.Empty;
         public int RamMb { get; set; } = 4096;
+    }
     }
 
     private void CurseForgeButton_Click(object sender, RoutedEventArgs e)
