@@ -105,6 +105,14 @@ public partial class MainWindow : Window
             SaveSettings();
             var path = new MinecraftPath(gameDirectory);
             _launcher = new MinecraftLauncher(path);
+            _launcher.FileProgressChanged += (_, args) =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    var total = args.TotalTasks <= 0 ? 1 : args.TotalTasks;
+                    StatusText.Text = $"{args.Name} ({args.ProgressedTasks}/{total})";
+                });
+            };
 
             StatusText.Text = $"Installing Minecraft {MinecraftVersion}...";
             await _launcher.InstallAsync(MinecraftVersion);
