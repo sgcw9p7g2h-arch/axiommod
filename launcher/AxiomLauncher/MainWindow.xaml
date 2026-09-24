@@ -30,8 +30,13 @@
               <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <TextBlock Text="Axiom Profile" FontSize="22" FontWeight="SemiBold"/>
-            <TextBlock Grid.Row="1" Text="Axiom Client • Minecraft 1.21.11" Foreground="{StaticResource AxiomMuted}" Margin="0,7,0,0"/>
-            <StackPanel Grid.Row="2" VerticalAlignment="Center">
+            <Grid Grid.Row="1" Margin="0,7,0,0">
+              <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+              <ComboBox x:Name="ProfileBox" Height="38" SelectionChanged="ProfileBox_SelectionChanged"/>
+              <Button Grid.Column="1" x:Name="SaveProfileButton" Content="SAVE PROFILE" Margin="10,0,0,0" Padding="14,8" Click="SaveProfileButton_Click"/>
+            </Grid>
+            <TextBlock Grid.Row="2" Text="Axiom Client • Minecraft 1.21.11" Foreground="{StaticResource AxiomMuted}" Margin="0,7,0,0"/>
+            <StackPanel Grid.Row="3" VerticalAlignment="Center">
               <TextBlock Text="Minecraft version" Foreground="{StaticResource AxiomMuted}"/>
               <ComboBox x:Name="VersionBox" Margin="0,8,0,18" Height="38" SelectedIndex="0"><ComboBoxItem Content="1.21.11"/></ComboBox>
               <TextBlock Text="Memory" Foreground="{StaticResource AxiomMuted}"/>
