@@ -63,11 +63,8 @@ public partial class MainWindow : Window
         {
             StatusText.Text = "Microsoft sign-in failed.";
             AccountText.Text = "Not signed in";
-            MessageBox.Show(
-                $"We couldn't sign you in.\n\n{ex.Message}",
-                "Axiom — Microsoft Login",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
+            MessageBox.Show($"We couldn't sign you in.\n\n{ex.Message}", "Axiom — Microsoft Login",
+                MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {
@@ -172,7 +169,8 @@ public partial class MainWindow : Window
         if (!string.IsNullOrWhiteSpace(remoteDigest) && File.Exists(destination))
         {
             var localDigest = await ComputeSha256Async(destination);
-            if (string.Equals(localDigest, remoteDigest.Replace("sha256:", "", StringComparison.OrdinalIgnoreCase), StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(localDigest, remoteDigest.Replace("sha256:", "", StringComparison.OrdinalIgnoreCase),
+                StringComparison.OrdinalIgnoreCase))
                 return;
         }
 
@@ -239,6 +237,24 @@ public partial class MainWindow : Window
     {
         public string GameDirectory { get; set; } = string.Empty;
         public int RamMb { get; set; } = 4096;
+    }
+
+    private void CurseForgeButton_Click(object sender, RoutedEventArgs e)
+    {
+        OpenExternal("https://www.curseforge.com/minecraft/search?class=mc-mods");
+        ContentStatusText.Text = "Opened CurseForge Minecraft mods.";
+    }
+
+    private void ModrinthButton_Click(object sender, RoutedEventArgs e)
+    {
+        OpenExternal("https://modrinth.com/discover/mods");
+        ContentStatusText.Text = "Opened Modrinth Minecraft mods.";
+    }
+
+    private void TexturePacksButton_Click(object sender, RoutedEventArgs e)
+    {
+        OpenExternal("https://modrinth.com/discover/resourcepacks");
+        ContentStatusText.Text = "Opened Modrinth resource packs. A direct pack.com connector can be added once the exact service is confirmed.";
     }
 
     private void DiscordButton_Click(object sender, RoutedEventArgs e)
