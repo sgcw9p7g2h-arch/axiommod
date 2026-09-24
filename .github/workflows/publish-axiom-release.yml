@@ -29,7 +29,7 @@ jobs:
         run: gradle --no-daemon build
 
       - name: Prepare launcher asset
-        run: cp build/libs/axiom-*.jar build/libs/axiom.jar
+        run: cp build/libs/axiom-0.1.0.jar build/libs/axiom.jar
 
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
