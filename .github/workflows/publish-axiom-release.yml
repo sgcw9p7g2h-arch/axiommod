@@ -1,0 +1,37 @@
+name: Publish Axiom Client Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.2.0'
+
+      - name: Build Axiom
+        run: gradle --no-daemon build
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: axiom-build-${{ github.run_number }}
+          name: Axiom Build ${{ github.run_number }}
+          generate_release_notes: true
+          files: build/libs/axiom-*.jar
