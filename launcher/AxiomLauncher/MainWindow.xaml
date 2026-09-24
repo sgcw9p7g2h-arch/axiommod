@@ -13,10 +13,14 @@
       <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
 
-    <StackPanel>
-      <TextBlock Text="AXIOM" FontSize="34" FontWeight="Bold"/>
-      <TextBlock Text="Minecraft launcher" Foreground="{StaticResource AxiomMuted}" Margin="0,3,0,0"/>
-    </StackPanel>
+    <DockPanel>
+      <StackPanel>
+        <TextBlock Text="AXIOM" FontSize="34" FontWeight="Bold"/>
+        <TextBlock Text="Minecraft client" Foreground="{StaticResource AxiomMuted}" Margin="0,3,0,0"/>
+      </StackPanel>
+      <Button x:Name="LoginButton" DockPanel.Dock="Right" Content="MICROSOFT LOGIN"
+              Padding="18,10" Click="LoginButton_Click"/>
+    </DockPanel>
 
     <Border Grid.Row="1" Background="{StaticResource AxiomPanel}" CornerRadius="14" Margin="0,28,0,28" Padding="28">
       <Grid>
@@ -28,7 +32,8 @@
         </Grid.RowDefinitions>
 
         <TextBlock Text="Axiom Profile" FontSize="22" FontWeight="SemiBold"/>
-        <TextBlock Grid.Row="1" Text="Fabric 1.21.11 • Axiom client" Foreground="{StaticResource AxiomMuted}" Margin="0,7,0,0"/>
+        <TextBlock Grid.Row="1" Text="Axiom Client • Minecraft 1.21.11"
+                   Foreground="{StaticResource AxiomMuted}" Margin="0,7,0,0"/>
 
         <StackPanel Grid.Row="2" VerticalAlignment="Center">
           <TextBlock Text="Minecraft version" Foreground="{StaticResource AxiomMuted}"/>
@@ -38,6 +43,9 @@
 
           <TextBlock Text="Game directory" Foreground="{StaticResource AxiomMuted}"/>
           <TextBox x:Name="GameDirBox" Margin="0,8,0,0" Height="38"/>
+
+          <TextBlock x:Name="AccountText" Text="Not signed in"
+                     Foreground="{StaticResource AxiomMuted}" Margin="0,14,0,0"/>
         </StackPanel>
 
         <Button Grid.Row="3" x:Name="LaunchButton" Content="LAUNCH AXIOM"
