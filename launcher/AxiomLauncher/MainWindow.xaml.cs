@@ -444,6 +444,19 @@ public partial class MainWindow : Window
         StatusText.Text = "Game directory updated.";
     }
 
+    private void OpenGameDirectoryButton_Click(object sender, RoutedEventArgs e)
+    {
+        var directory = GameDirBox.Text.Trim();
+        if (string.IsNullOrWhiteSpace(directory))
+        {
+            MessageBox.Show("Choose a Minecraft game directory first.", "Axiom Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        Directory.CreateDirectory(directory);
+        Process.Start(new ProcessStartInfo("explorer.exe", directory) { UseShellExecute = true });
+    }
+
     private void SettingsButton_Click(object sender, RoutedEventArgs e)
     {
         SaveSettings();
