@@ -247,6 +247,73 @@ public partial class MainWindow : Window
         StatusText.Text = $"{_profiles[_selectedProfileIndex].Name} saved.";
     }
 
+    private void RenameProfileButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_selectedProfileIndex < 0 || _selectedProfileIndex >= MaxProfiles) return;
+
+        var current = _profiles[_selectedProfileIndex].Name;
+        var dialog = new Window
+        {
+            Title = "Rename Axiom Profile",
+            Width = 420,
+            Height = 190,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Owner = this,
+            ResizeMode = ResizeMode.NoResize,
+            Background = (System.Windows.Media.Brush)FindResource("AxiomPanel"),
+            Foreground = (System.Windows.Media.Brush)FindResource("AxiomText")
+        };
+
+        var root = new System.Windows.Controls.StackPanel { Margin = new Thickness(20) };
+        root.Children.Add(new System.Windows.Controls.TextBlock
+        {
+            Text = "Profile name",
+            FontSize = 16,
+            FontWeight = FontWeights.SemiBold
+        });
+
+        var input = new System.Windows.Controls.TextBox
+        {
+            Text = current,
+            Height = 36,
+            Margin = new Thickness(0, 10, 0, 14)
+        };
+        root.Children.Add(input);
+
+        var buttons = new System.Windows.Controls.StackPanel
+        {
+            Orientation = System.Windows.Controls.Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Right
+        };
+        var cancel = new System.Windows.Controls.Button { Content = "CANCEL", Padding = new Thickness(14, 7), Margin = new Thickness(0, 0, 8, 0) };
+        cancel.Click += (_, _) => dialog.DialogResult = false;
+        var save = new System.Windows.Controls.Button { Content = "SAVE", Padding = new Thickness(14, 7) };
+        save.Click += (_, _) =>
+        {
+            var name = input.Text.Trim();
+            if (name.Length == 0)
+            {
+                MessageBox.Show("Enter a profile name.", "Axiom Profile", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            _profiles[_selectedProfileIndex].Name = name;
+            ProfileBox.Items[_selectedProfileIndex] = name;
+            ProfileBox.SelectedIndex = _selectedProfileIndex;
+            SaveSettings();
+            StatusText.Text = $"Profile renamed to {name}.";
+            dialog.DialogResult = true;
+        };
+        buttons.Children.Add(cancel);
+        buttons.Children.Add(save);
+        root.Children.Add(buttons);
+
+        dialog.Content = root;
+        input.Focus();
+        input.SelectAll();
+        dialog.ShowDialog();
+    }
+
     private void SaveCurrentProfile()
     {
         if (ProfileBox.SelectedIndex < 0 || ProfileBox.SelectedIndex >= MaxProfiles) return;
