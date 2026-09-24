@@ -12,16 +12,13 @@
       <RowDefinition Height="*"/>
       <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
-
     <DockPanel>
       <StackPanel>
         <TextBlock Text="AXIOM" FontSize="34" FontWeight="Bold"/>
         <TextBlock Text="Minecraft client" Foreground="{StaticResource AxiomMuted}" Margin="0,3,0,0"/>
       </StackPanel>
-      <Button x:Name="LoginButton" DockPanel.Dock="Right" Content="MICROSOFT LOGIN"
-              Padding="18,10" Click="LoginButton_Click"/>
+      <Button x:Name="LoginButton" DockPanel.Dock="Right" Content="MICROSOFT LOGIN" Padding="18,10" Click="LoginButton_Click"/>
     </DockPanel>
-
     <TabControl Grid.Row="1" Margin="0,28,0,28">
       <TabItem Header="PLAY">
         <Border Background="{StaticResource AxiomPanel}" CornerRadius="14" Padding="28">
@@ -32,120 +29,96 @@
               <RowDefinition Height="*"/>
               <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-
             <TextBlock Text="Axiom Profile" FontSize="22" FontWeight="SemiBold"/>
-            <TextBlock Grid.Row="1" Text="Axiom Client • Minecraft 1.21.11"
-                       Foreground="{StaticResource AxiomMuted}" Margin="0,7,0,0"/>
-
+            <TextBlock Grid.Row="1" Text="Axiom Client • Minecraft 1.21.11" Foreground="{StaticResource AxiomMuted}" Margin="0,7,0,0"/>
             <StackPanel Grid.Row="2" VerticalAlignment="Center">
               <TextBlock Text="Minecraft version" Foreground="{StaticResource AxiomMuted}"/>
-              <ComboBox x:Name="VersionBox" Margin="0,8,0,18" Height="38" SelectedIndex="0">
-                <ComboBoxItem Content="1.21.11"/>
-              </ComboBox>
-
+              <ComboBox x:Name="VersionBox" Margin="0,8,0,18" Height="38" SelectedIndex="0"><ComboBoxItem Content="1.21.11"/></ComboBox>
               <TextBlock Text="Memory" Foreground="{StaticResource AxiomMuted}"/>
               <ComboBox x:Name="RamBox" Margin="0,8,0,18" Height="38" SelectedIndex="1">
-                <ComboBoxItem Content="2 GB"/>
-                <ComboBoxItem Content="4 GB"/>
-                <ComboBoxItem Content="6 GB"/>
-                <ComboBoxItem Content="8 GB"/>
+                <ComboBoxItem Content="2 GB"/><ComboBoxItem Content="4 GB"/><ComboBoxItem Content="6 GB"/><ComboBoxItem Content="8 GB"/>
               </ComboBox>
-
               <TextBlock Text="Game directory" Foreground="{StaticResource AxiomMuted}"/>
               <TextBox x:Name="GameDirBox" Margin="0,8,0,0" Height="38"/>
-
-              <TextBlock x:Name="AccountText" Text="Not signed in"
-                         Foreground="{StaticResource AxiomMuted}" Margin="0,14,0,0"/>
+              <TextBlock x:Name="AccountText" Text="Not signed in" Foreground="{StaticResource AxiomMuted}" Margin="0,14,0,0"/>
             </StackPanel>
-
-            <Button Grid.Row="3" x:Name="LaunchButton" Content="LAUNCH AXIOM"
-                    Height="52" FontSize="16" FontWeight="Bold"
-                    Click="LaunchButton_Click"/>
+            <Button Grid.Row="3" x:Name="LaunchButton" Content="LAUNCH AXIOM" Height="52" FontSize="16" FontWeight="Bold" Click="LaunchButton_Click"/>
           </Grid>
         </Border>
+      </TabItem>
+
+      <TabItem Header="MODS &amp; PACKS">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel Margin="8">
+            <TextBlock Text="Mods &amp; Texture Packs" FontSize="24" FontWeight="SemiBold"/>
+            <TextBlock Text="Find Minecraft content and add it to your Axiom profile." Foreground="{StaticResource AxiomMuted}" Margin="0,6,0,22"/>
+
+            <TextBlock Text="MODS" FontSize="16" FontWeight="Bold" Margin="0,0,0,12"/>
+            <Grid>
+              <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+              <Border Grid.Column="0" Background="{StaticResource AxiomPanel}" CornerRadius="12" Padding="18" Margin="0,0,8,0">
+                <StackPanel>
+                  <TextBlock Text="CURSEFORGE" FontSize="18" FontWeight="Bold"/>
+                  <TextBlock Text="Browse Minecraft mods and modpacks." Foreground="{StaticResource AxiomMuted}" Margin="0,6,0,14"/>
+                  <Button Content="BROWSE CURSEFORGE" Click="CurseForgeButton_Click" Padding="12,9"/>
+                </StackPanel>
+              </Border>
+              <Border Grid.Column="1" Background="{StaticResource AxiomPanel}" CornerRadius="12" Padding="18" Margin="8,0,0,0">
+                <StackPanel>
+                  <TextBlock Text="MODRINTH" FontSize="18" FontWeight="Bold"/>
+                  <TextBlock Text="Browse mods, shaders, resource packs and more." Foreground="{StaticResource AxiomMuted}" Margin="0,6,0,14"/>
+                  <Button Content="BROWSE MODRINTH" Click="ModrinthButton_Click" Padding="12,9"/>
+                </StackPanel>
+              </Border>
+            </Grid>
+
+            <TextBlock Text="TEXTURE PACKS" FontSize="16" FontWeight="Bold" Margin="0,28,0,12"/>
+            <Border Background="{StaticResource AxiomPanel}" CornerRadius="12" Padding="18">
+              <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <StackPanel>
+                  <TextBlock Text="PACK LIBRARY" FontSize="18" FontWeight="Bold"/>
+                  <TextBlock Text="Browse Minecraft texture/resource packs." Foreground="{StaticResource AxiomMuted}" Margin="0,6,0,0"/>
+                </StackPanel>
+                <Button Grid.Column="1" Content="BROWSE PACKS" Click="TexturePacksButton_Click" Padding="18,9" VerticalAlignment="Center"/>
+              </Grid>
+            </Border>
+
+            <TextBlock Text="Axiom will check the selected Minecraft version and mod loader before installing compatible content." Foreground="{StaticResource AxiomMuted}" TextWrapping="Wrap" Margin="0,18,0,0"/>
+            <TextBlock x:Name="ContentStatusText" Text="Choose a source to browse Minecraft content." Foreground="{StaticResource AxiomMuted}" Margin="0,8,0,0"/>
+          </StackPanel>
+        </ScrollViewer>
       </TabItem>
 
       <TabItem Header="COMMUNITY">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
           <StackPanel Margin="8">
             <TextBlock Text="Axiom Community" FontSize="24" FontWeight="SemiBold"/>
-            <TextBlock Text="Connect your socials and see the Axiom community at a glance."
-                       Foreground="{StaticResource AxiomMuted}" Margin="0,6,0,22"/>
-
+            <TextBlock Text="Connect your socials and see the Axiom community at a glance." Foreground="{StaticResource AxiomMuted}" Margin="0,6,0,22"/>
             <Grid>
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-              </Grid.ColumnDefinitions>
-
+              <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
               <Border Grid.Column="0" Background="{StaticResource AxiomPanel}" CornerRadius="12" Padding="18" Margin="0,0,8,0">
-                <StackPanel>
-                  <TextBlock Text="DISCORD" FontWeight="Bold" FontSize="16"/>
-                  <TextBlock Text="Community account" Foreground="{StaticResource AxiomMuted}" Margin="0,6,0,14"/>
-                  <Button Content="CONNECT DISCORD" Click="DiscordButton_Click" Padding="10,8"/>
-                </StackPanel>
+                <StackPanel><TextBlock Text="DISCORD" FontWeight="Bold" FontSize="16"/><TextBlock Text="Community account" Foreground="{StaticResource AxiomMuted}" Margin="0,6,0,14"/><Button Content="CONNECT DISCORD" Click="DiscordButton_Click" Padding="10,8"/></StackPanel>
               </Border>
-
               <Border Grid.Column="1" Background="{StaticResource AxiomPanel}" CornerRadius="12" Padding="18" Margin="4,0">
-                <StackPanel>
-                  <TextBlock Text="TIKTOK" FontWeight="Bold" FontSize="16"/>
-                  <TextBlock Text="Creator account" Foreground="{StaticResource AxiomMuted}" Margin="0,6,0,14"/>
-                  <Button Content="CONNECT TIKTOK" Click="TikTokButton_Click" Padding="10,8"/>
-                </StackPanel>
+                <StackPanel><TextBlock Text="TIKTOK" FontWeight="Bold" FontSize="16"/><TextBlock Text="Creator account" Foreground="{StaticResource AxiomMuted}" Margin="0,6,0,14"/><Button Content="CONNECT TIKTOK" Click="TikTokButton_Click" Padding="10,8"/></StackPanel>
               </Border>
-
               <Border Grid.Column="2" Background="{StaticResource AxiomPanel}" CornerRadius="12" Padding="18" Margin="8,0,0,0">
-                <StackPanel>
-                  <TextBlock Text="MORE" FontWeight="Bold" FontSize="16"/>
-                  <TextBlock Text="More integrations later" Foreground="{StaticResource AxiomMuted}" Margin="0,6,0,14"/>
-                  <Button Content="COMING SOON" IsEnabled="False" Padding="10,8"/>
-                </StackPanel>
+                <StackPanel><TextBlock Text="MORE" FontWeight="Bold" FontSize="16"/><TextBlock Text="More integrations later" Foreground="{StaticResource AxiomMuted}" Margin="0,6,0,14"/><Button Content="COMING SOON" IsEnabled="False" Padding="10,8"/></StackPanel>
               </Border>
             </Grid>
-
             <TextBlock Text="CLIENT ACTIVITY" FontSize="16" FontWeight="Bold" Margin="0,28,0,12"/>
-
             <Grid>
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-              </Grid.ColumnDefinitions>
-
-              <Border Grid.Column="0" Background="{StaticResource AxiomPanel}" CornerRadius="12" Padding="18" Margin="0,0,8,0">
-                <StackPanel>
-                  <TextBlock Text="ONLINE NOW" Foreground="{StaticResource AxiomMuted}"/>
-                  <TextBlock x:Name="OnlinePlayersText" Text="—" FontSize="30" FontWeight="Bold" Margin="0,5,0,0"/>
-                  <TextBlock Text="Live aggregate" Foreground="{StaticResource AxiomMuted}"/>
-                </StackPanel>
-              </Border>
-
-              <Border Grid.Column="1" Background="{StaticResource AxiomPanel}" CornerRadius="12" Padding="18" Margin="4,0">
-                <StackPanel>
-                  <TextBlock Text="OFFLINE" Foreground="{StaticResource AxiomMuted}"/>
-                  <TextBlock x:Name="OfflinePlayersText" Text="—" FontSize="30" FontWeight="Bold" Margin="0,5,0,0"/>
-                  <TextBlock Text="Known accounts not active" Foreground="{StaticResource AxiomMuted}"/>
-                </StackPanel>
-              </Border>
-
-              <Border Grid.Column="2" Background="{StaticResource AxiomPanel}" CornerRadius="12" Padding="18" Margin="8,0,0,0">
-                <StackPanel>
-                  <TextBlock Text="TOTAL" Foreground="{StaticResource AxiomMuted}"/>
-                  <TextBlock x:Name="TotalPlayersText" Text="—" FontSize="30" FontWeight="Bold" Margin="0,5,0,0"/>
-                  <TextBlock Text="Registered clients" Foreground="{StaticResource AxiomMuted}"/>
-                </StackPanel>
-              </Border>
+              <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+              <Border Grid.Column="0" Background="{StaticResource AxiomPanel}" CornerRadius="12" Padding="18" Margin="0,0,8,0"><StackPanel><TextBlock Text="ONLINE NOW" Foreground="{StaticResource AxiomMuted}"/><TextBlock x:Name="OnlinePlayersText" Text="—" FontSize="30" FontWeight="Bold" Margin="0,5,0,0"/><TextBlock Text="Live aggregate" Foreground="{StaticResource AxiomMuted}"/></StackPanel></Border>
+              <Border Grid.Column="1" Background="{StaticResource AxiomPanel}" CornerRadius="12" Padding="18" Margin="4,0"><StackPanel><TextBlock Text="OFFLINE" Foreground="{StaticResource AxiomMuted}"/><TextBlock x:Name="OfflinePlayersText" Text="—" FontSize="30" FontWeight="Bold" Margin="0,5,0,0"/><TextBlock Text="Known accounts not active" Foreground="{StaticResource AxiomMuted}"/></StackPanel></Border>
+              <Border Grid.Column="2" Background="{StaticResource AxiomPanel}" CornerRadius="12" Padding="18" Margin="8,0,0,0"><StackPanel><TextBlock Text="TOTAL" Foreground="{StaticResource AxiomMuted}"/><TextBlock x:Name="TotalPlayersText" Text="—" FontSize="30" FontWeight="Bold" Margin="0,5,0,0"/><TextBlock Text="Registered clients" Foreground="{StaticResource AxiomMuted}"/></StackPanel></Border>
             </Grid>
-
-            <TextBlock x:Name="CommunityStatusText"
-                       Text="Community stats will appear when the Axiom service is connected."
-                       Foreground="{StaticResource AxiomMuted}" Margin="0,18,0,0"/>
+            <TextBlock x:Name="CommunityStatusText" Text="Community stats will appear when the Axiom service is connected." Foreground="{StaticResource AxiomMuted}" Margin="0,18,0,0"/>
           </StackPanel>
         </ScrollViewer>
       </TabItem>
     </TabControl>
-
     <DockPanel Grid.Row="2">
       <TextBlock x:Name="StatusText" Text="Ready" Foreground="{StaticResource AxiomMuted}"/>
       <Button DockPanel.Dock="Right" Content="Settings" Padding="18,8" Click="SettingsButton_Click"/>
