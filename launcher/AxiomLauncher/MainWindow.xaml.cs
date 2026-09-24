@@ -299,7 +299,6 @@ public partial class MainWindow : Window
         public string GameDirectory { get; set; } = string.Empty;
         public int RamMb { get; set; } = 4096;
     }
-    }
 
     private void CurseForgeButton_Click(object sender, RoutedEventArgs e)
     {
