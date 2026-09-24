@@ -95,9 +95,15 @@ public partial class MainWindow : Window
 
         try
         {
-            SaveSettings();
             SaveCurrentProfile();
-            var path = new MinecraftPath(GameDirBox.Text);
+            var gameDirectory = GameDirBox.Text.Trim();
+            if (string.IsNullOrWhiteSpace(gameDirectory))
+                throw new InvalidOperationException("Choose a Minecraft game directory before launching.");
+
+            Directory.CreateDirectory(gameDirectory);
+            GameDirBox.Text = gameDirectory;
+            SaveSettings();
+            var path = new MinecraftPath(gameDirectory);
             _launcher = new MinecraftLauncher(path);
 
             StatusText.Text = $"Installing Minecraft {MinecraftVersion}...";
