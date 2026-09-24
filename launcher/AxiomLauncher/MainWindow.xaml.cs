@@ -212,11 +212,31 @@ public partial class MainWindow : Window
 
     private async Task DownloadFileAsync(string url, string destination)
     {
-        using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-        response.EnsureSuccessStatusCode();
-        await using var input = await response.Content.ReadAsStreamAsync();
-        await using var output = File.Create(destination);
-        await input.CopyToAsync(output);
+        var directory = Path.GetDirectoryName(destination);
+        if (!string.IsNullOrEmpty(directory))
+            Directory.CreateDirectory(directory);
+
+        var temporary = destination + ".download";
+        try
+        {
+            using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            await using var input = await response.Content.ReadAsStreamAsync();
+            await using var output = new FileStream(temporary, FileMode.Create, FileAccess.Write, FileShare.None);
+            await input.CopyToAsync(output);
+            await output.FlushAsync();
+
+            File.Move(temporary, destination, true);
+        }
+        catch
+        {
+            try
+            {
+                if (File.Exists(temporary)) File.Delete(temporary);
+            }
+            catch { }
+            throw;
+        }
     }
 
     private static async Task<string> ComputeSha256Async(string path)
