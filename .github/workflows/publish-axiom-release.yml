@@ -28,10 +28,13 @@ jobs:
       - name: Build Axiom
         run: gradle --no-daemon build
 
+      - name: Prepare launcher asset
+        run: cp build/libs/axiom-*.jar build/libs/axiom.jar
+
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: axiom-build-${{ github.run_number }}
           name: Axiom Build ${{ github.run_number }}
           generate_release_notes: true
-          files: build/libs/axiom-*.jar
+          files: build/libs/axiom.jar
