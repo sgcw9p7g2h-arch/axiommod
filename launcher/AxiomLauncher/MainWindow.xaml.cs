@@ -70,7 +70,7 @@ public partial class MainWindow : Window
         {
             StatusText.Text = "Microsoft sign-in failed.";
             AccountText.Text = "Not signed in";
-            MessageBox.Show($"We couldn't sign you in.\n\n{ex.Message}", "Axiom — Microsoft Login",
+            System.Windows.MessageBox.Show($"We couldn't sign you in.\n\n{ex.Message}", "Axiom — Microsoft Login",
                 MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
@@ -84,7 +84,7 @@ public partial class MainWindow : Window
     {
         if (_session == null)
         {
-            MessageBox.Show("Sign in with Microsoft first.", "Axiom Launcher",
+            System.Windows.MessageBox.Show("Sign in with Microsoft first.", "Axiom Launcher",
                 MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
@@ -130,7 +130,7 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             StatusText.Text = "Launch failed.";
-            MessageBox.Show(ex.Message, "Axiom Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
+            System.Windows.MessageBox.Show(ex.Message, "Axiom Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {
@@ -283,17 +283,17 @@ public partial class MainWindow : Window
         var buttons = new System.Windows.Controls.StackPanel
         {
             Orientation = System.Windows.Controls.Orientation.Horizontal,
-            HorizontalAlignment = HorizontalAlignment.Right
+            HorizontalAlignment = System.Windows.HorizontalAlignment.Right
         };
-        var cancel = new System.Windows.Controls.Button { Content = "CANCEL", Padding = new Thickness(14, 7), Margin = new Thickness(0, 0, 8, 0) };
+        var cancel = new System.Windows.Controls.Button { Content = "CANCEL", Padding = new Thickness(14, 7, 14, 7), Margin = new Thickness(0, 0, 8, 0) };
         cancel.Click += (_, _) => dialog.DialogResult = false;
-        var save = new System.Windows.Controls.Button { Content = "SAVE", Padding = new Thickness(14, 7) };
+        var save = new System.Windows.Controls.Button { Content = "SAVE", Padding = new Thickness(14, 7, 14, 7) };
         save.Click += (_, _) =>
         {
             var name = input.Text.Trim();
             if (name.Length == 0)
             {
-                MessageBox.Show("Enter a profile name.", "Axiom Profile", MessageBoxButton.OK, MessageBoxImage.Information);
+                System.Windows.MessageBox.Show("Enter a profile name.", "Axiom Profile", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
@@ -448,7 +448,7 @@ public partial class MainWindow : Window
         var directory = GameDirBox.Text.Trim();
         if (string.IsNullOrWhiteSpace(directory))
         {
-            MessageBox.Show("Choose a Minecraft game directory first.", "Axiom Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
+            System.Windows.MessageBox.Show("Choose a Minecraft game directory first.", "Axiom Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
@@ -459,6 +459,6 @@ public partial class MainWindow : Window
     private void SettingsButton_Click(object sender, RoutedEventArgs e)
     {
         SaveSettings();
-        MessageBox.Show("Your Axiom game directory and RAM setting are saved automatically.", "Axiom Launcher");
+        System.Windows.MessageBox.Show("Your Axiom game directory and RAM setting are saved automatically.", "Axiom Launcher");
     }
 }
