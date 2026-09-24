@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using System.Linq;
 using System.Windows;
+using System.Windows.Forms;
 using CmlLib.Core;
 using CmlLib.Core.Auth;
 using CmlLib.Core.Auth.Microsoft;
@@ -422,6 +423,25 @@ public partial class MainWindow : Window
     private static void OpenExternal(string url)
     {
         Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+    }
+
+    private void BrowseGameDirectoryButton_Click(object sender, RoutedEventArgs e)
+    {
+        using var dialog = new System.Windows.Forms.FolderBrowserDialog
+        {
+            Description = "Choose the Minecraft game directory",
+            UseDescriptionForTitle = true,
+            SelectedPath = Directory.Exists(GameDirBox.Text) ? GameDirBox.Text : string.Empty,
+            ShowNewFolderButton = true
+        };
+
+        if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+            return;
+
+        GameDirBox.Text = dialog.SelectedPath;
+        SaveCurrentProfile();
+        SaveSettings();
+        StatusText.Text = "Game directory updated.";
     }
 
     private void SettingsButton_Click(object sender, RoutedEventArgs e)
