@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text.Json;
@@ -238,6 +239,23 @@ public partial class MainWindow : Window
     {
         public string GameDirectory { get; set; } = string.Empty;
         public int RamMb { get; set; } = 4096;
+    }
+
+    private void DiscordButton_Click(object sender, RoutedEventArgs e)
+    {
+        OpenExternal("https://discord.com/");
+        CommunityStatusText.Text = "Discord connection setup opened. OAuth linking will be enabled with the Axiom service.";
+    }
+
+    private void TikTokButton_Click(object sender, RoutedEventArgs e)
+    {
+        OpenExternal("https://www.tiktok.com/");
+        CommunityStatusText.Text = "TikTok connection setup opened. OAuth linking will be enabled with the Axiom service.";
+    }
+
+    private static void OpenExternal(string url)
+    {
+        Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
     }
 
     private void SettingsButton_Click(object sender, RoutedEventArgs e)
