@@ -265,6 +265,18 @@ public partial class MainWindow : Window
                     ProfileBox.Items[i] = _profiles[i].Name;
                 }
             }
+            if (settings.Profiles?.Length != MaxProfiles && (settings.GameDirectory is not null || settings.RamMb > 0))
+            {
+                // Migrate the pre-profile settings format into Profile 1.
+                _profiles[0].GameDirectory = string.IsNullOrWhiteSpace(settings.GameDirectory)
+                    ? GameDirBox.Text
+                    : settings.GameDirectory;
+                _profiles[0].RamMb = settings.RamMb is 2048 or 4096 or 6144 or 8192
+                    ? settings.RamMb
+                    : 4096;
+                ProfileBox.Items[0] = _profiles[0].Name;
+            }
+
             _selectedProfileIndex = Math.Clamp(settings.SelectedProfile, 0, MaxProfiles - 1);
             ProfileBox.SelectedIndex = _selectedProfileIndex;
             var selected = _profiles[_selectedProfileIndex];
@@ -291,6 +303,10 @@ public partial class MainWindow : Window
     {
         public LauncherProfile[] Profiles { get; set; } = Array.Empty<LauncherProfile>();
         public int SelectedProfile { get; set; }
+
+        // Legacy settings fields retained so older Axiom installs migrate cleanly.
+        public string? GameDirectory { get; set; }
+        public int RamMb { get; set; }
     }
 
     private sealed class LauncherProfile
