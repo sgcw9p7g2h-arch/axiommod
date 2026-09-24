@@ -466,7 +466,11 @@ public partial class MainWindow : Window
 
     private void SettingsButton_Click(object sender, RoutedEventArgs e)
     {
+        SaveCurrentProfile();
         SaveSettings();
-        System.Windows.MessageBox.Show("Your Axiom game directory and RAM setting are saved automatically.", "Axiom Launcher");
+        StatusText.Text = "Settings saved.";
+        System.Windows.MessageBox.Show(
+            $"Profile: {_profiles[_selectedProfileIndex].Name}\nRAM: {GetSelectedRamMb() / 1024} GB\nGame directory: {GameDirBox.Text}",
+            "Axiom Settings", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 }
