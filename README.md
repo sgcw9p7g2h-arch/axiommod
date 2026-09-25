@@ -1,34 +1,46 @@
 # Axiom
 
-A client-side Fabric mod for Minecraft Java 1.21.11 focused on schematic building and utilities.
+A standalone Minecraft Java client and launcher for Windows, with the current Fabric codebase serving as the technical foundation for client-side systems.
 
-## Features
+## Client
 
-- Imports `.litematic` files, including multiple regions, palettes, packed block states, and negative region sizes.
-- Supports legacy `.axschem` files and full serialized block-state properties.
-- Browses local schematics and public online `.litematic` files.
-- Previews schematics with a wireframe, tracks materials, and builds bottom-up using ordinary Minecraft interactions.
-- Supports rotation, X/Z mirrors, existing-block skipping, reach checks, pause/resume/cancel, and a HUD.
+The final product is intended to behave like a standalone Minecraft client rather than a mod that users manually install into another launcher.
 
-## Controls
+The Windows launcher is responsible for:
 
-- **M** — open the schematic browser
-- **B** — start, pause, or resume a build
-- **P** — pause or resume
-- **O** — set the build origin from the block you are looking at
-- **R** — rotate the selected schematic clockwise
-- **X** — cancel a build
-- **Enter** — select a schematic in the browser
-- **Ctrl** — open Online Schematics from the browser
+- Microsoft account authentication.
+- Axiom game-directory management.
+- Minecraft version installation.
+- Fabric runtime setup used by the current technical foundation.
+- Axiom client updates.
+- Per-profile game directories and RAM settings.
+- Launching Minecraft through the Axiom profile.
+- Packaging a standalone `AxiomLauncher.exe` release.
 
-## Schematic folder
+The current launcher milestone targets Minecraft Java 1.21.11.
 
-Put `.litematic` or `.axschem` files in `.minecraft/axiom/schematics/`.
+## Development direction
+
+The standalone launcher/client pipeline is the active development priority. The existing in-game feature system is intentionally frozen while the client foundation is completed.
+
+The repository may contain Fabric-based prototype components because they are the current technical foundation. They are not the final product definition.
 
 ## Build
 
-Install JDK 21 and run `gradlew.bat build` on Windows, or `./gradlew build` on macOS/Linux. The first build needs internet access to download Gradle and Minecraft/Fabric dependencies. The remapped mod JAR is written to `build/libs/`.
+The repository contains both the Java client foundation and the Windows launcher.
 
-Fabric Loader and Fabric API are required in the Minecraft installation. Test in a disposable world first. Blocks whose placement depends on player orientation, block entities, or multi-block behavior may need in-game adjustment.
+For the Java foundation, use JDK 21 and run `gradlew.bat build` on Windows or `./gradlew build` on macOS/Linux.
 
-The builder uses normal Minecraft interaction. It does not use packet spoofing, anti-cheat bypasses, exploit abuse, or hidden-player-information discovery.
+For the Windows launcher, use .NET 8 and run:
+
+```text
+dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+```
+
+The release workflow builds both components and publishes the launcher executable together with the current Axiom client asset.
+
+## Repository structure
+
+- `launcher/AxiomLauncher/` — standalone Windows launcher.
+- `src/main/java/` — current Java/Fabric technical foundation.
+- `.github/workflows/` — client, launcher, verification, and release automation.
