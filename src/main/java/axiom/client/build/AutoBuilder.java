@@ -75,6 +75,7 @@ public final class AutoBuilder {
         if (target == null) {
             queue.poll();
             queue.skip();
+            failedPlacementTicks = 0;
             AxiomClient.HUD.message("Skipped unknown block: " + task.blockId());
             return;
         }
@@ -84,6 +85,7 @@ public final class AutoBuilder {
         if (target.defaultBlockState().isAir()) {
             queue.poll();
             queue.skip();
+            failedPlacementTicks = 0;
             return;
         }
 
@@ -91,12 +93,14 @@ public final class AutoBuilder {
         if (AxiomClient.CONFIG.skipExisting && current.equals(targetState)) {
             queue.poll();
             queue.complete();
+            failedPlacementTicks = 0;
             return;
         }
 
         if (!current.isAir() && !current.canBeReplaced()) {
             queue.poll();
             queue.skip();
+            failedPlacementTicks = 0;
             return;
         }
 
@@ -117,11 +121,16 @@ public final class AutoBuilder {
             failedPlacementTicks = 0;
             cooldown = Math.max(1, AxiomClient.CONFIG.tickDelay);
         } else {
+            // A block may be valid but temporarily have no support because another
+            // block in the same schematic layer has not been placed yet. Defer it
+            // instead of immediately giving up on the whole build.
             failedPlacementTicks++;
+            queue.defer();
             cooldown = 1;
-            if (failedPlacementTicks >= 20) {
-                pauseWithMessage("Paused: no valid placement face");
+            if (failedPlacementTicks >= Math.max(1, queue.remaining())) {
+                pauseWithMessage("Paused: no progress; check placement/support");
             }
+            return;
         }
 
         // Only consume the queue entry after the world confirms the target block.
@@ -177,6 +186,7 @@ public final class AutoBuilder {
         if (running) {
             paused = false;
             cooldown = Math.max(cooldown, 1);
+            failedPlacementTicks = 0;
             AxiomClient.HUD.message("Build resumed");
         }
     }

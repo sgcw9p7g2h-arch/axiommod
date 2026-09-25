@@ -16,6 +16,13 @@ public final class BuildQueue {
     public void add(BuildTask task) { pending.add(task); }
     public BuildTask peek() { return pending.peek(); }
     public BuildTask poll() { return pending.poll(); }
+
+    /** Moves the current task to the end so later blocks can provide support. */
+    public void defer() {
+        BuildTask task = pending.poll();
+        if (task != null) pending.add(task);
+    }
+
     public void complete() { completed++; }
     public void skip() { skipped++; }
     public int remaining() { return pending.size(); }
