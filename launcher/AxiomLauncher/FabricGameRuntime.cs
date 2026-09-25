@@ -15,7 +15,7 @@ internal sealed class FabricGameRuntime : IAxiomGameRuntime
 
         var path = new MinecraftPath(request.GameDirectory);
         var launcher = new MinecraftLauncher(path);
-        var session = new MSession(request.Username, request.AccessToken);
+        var session = new MSession(request.Username, request.AccessToken, request.Uuid);
 
         var options = new MLaunchOption
         {
