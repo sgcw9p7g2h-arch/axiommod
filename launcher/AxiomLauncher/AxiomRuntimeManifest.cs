@@ -24,6 +24,38 @@ internal sealed class AxiomRuntimeManifest
         InstalledAtUtc = state.InstalledAtUtc
     };
 
+    public bool Matches(
+        string clientVersion,
+        string minecraftVersion,
+        string fabricLoaderVersion,
+        string fabricApiVersion,
+        string clientAsset,
+        string clientAssetSha256) =>
+        SchemaVersion == 1 &&
+        string.Equals(ClientVersion, clientVersion, StringComparison.Ordinal) &&
+        string.Equals(MinecraftVersion, minecraftVersion, StringComparison.Ordinal) &&
+        string.Equals(FabricLoaderVersion, fabricLoaderVersion, StringComparison.Ordinal) &&
+        string.Equals(FabricApiVersion, fabricApiVersion, StringComparison.Ordinal) &&
+        string.Equals(ClientAsset, clientAsset, StringComparison.Ordinal) &&
+        string.Equals(ClientAssetSha256, clientAssetSha256, StringComparison.OrdinalIgnoreCase) &&
+        InstalledAtUtc != default;
+
+    public static async Task<AxiomRuntimeManifest?> LoadAsync(string path)
+    {
+        if (!File.Exists(path))
+            return null;
+
+        try
+        {
+            await using var stream = File.OpenRead(path);
+            return await JsonSerializer.DeserializeAsync<AxiomRuntimeManifest>(stream);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     public async Task SaveAsync(string path)
     {
         var directory = Path.GetDirectoryName(path);
