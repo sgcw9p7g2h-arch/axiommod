@@ -1,6 +1,7 @@
 package axiom.client;
 
 import axiom.client.build.*;
+import axiom.client.features.FeatureManager;
 import axiom.client.schematic.*;
 import axiom.client.ui.SchematicBrowserScreen;
 import net.fabricmc.api.ClientModInitializer;
@@ -19,6 +20,7 @@ public final class AxiomClient implements ClientModInitializer {
     public static final BuildConfig CONFIG = new BuildConfig(FabricLoader.getInstance().getConfigDir().resolve("axiom.properties"));
     public static final AutoBuilder BUILDER = new AutoBuilder();
     public static final BuildHud HUD = new BuildHud();
+    public static final FeatureManager FEATURES = new FeatureManager(FabricLoader.getInstance().getConfigDir());
     private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(Identifier.fromNamespaceAndPath(MOD_ID, "controls"));
     private static KeyMapping menu, build, pause, origin, rotate, cancel;
 
@@ -31,6 +33,7 @@ public final class AxiomClient implements ClientModInitializer {
 
     @Override public void onInitializeClient() {
         CONFIG.load();
+        FEATURES.load();
         SCHEMATICS.loadAll();
         SchematicPreview.register();
         menu = key("open_browser", GLFW.GLFW_KEY_M); build = key("build", GLFW.GLFW_KEY_B);
