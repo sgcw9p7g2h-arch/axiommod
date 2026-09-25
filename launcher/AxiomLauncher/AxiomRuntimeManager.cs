@@ -10,6 +10,7 @@ internal sealed class AxiomRuntimeManager
     private const string RuntimeDirectoryName = "runtime";
     private const string StateFileName = "client-state.json";
     private const string ModsDirectoryName = "mods";
+    private const string LockFileName = "runtime.lock";
 
     private static string GetStatePath(MinecraftPath path) =>
         Path.Combine(path.BasePath, StateDirectoryName, StateFileName);
