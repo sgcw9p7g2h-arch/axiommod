@@ -6,11 +6,13 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 public final class FeatureHud {
     private static boolean lastLeft, lastRight;
-    private static int leftCps, rightCps, clickWindowTicks;
-    private static long lastLeftClickNanos, lastRightClickNanos;
+    private static final Deque<Long> leftClicks = new ArrayDeque<>();
+    private static final Deque<Long> rightClicks = new ArrayDeque<>();
 
     private FeatureHud() {}
 
@@ -19,17 +21,16 @@ public final class FeatureHud {
         long handle = client.getWindow().handle();
         boolean left = GLFW.glfwGetMouseButton(handle, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
         boolean right = GLFW.glfwGetMouseButton(handle, GLFW.GLFW_MOUSE_BUTTON_RIGHT) == GLFW.GLFW_PRESS;
-        if (left && !lastLeft) { leftCps++; lastLeftClickNanos = System.nanoTime(); }
-        if (right && !lastRight) { rightCps++; lastRightClickNanos = System.nanoTime(); }
+        long now = System.nanoTime();
+        if (left && !lastLeft) leftClicks.addLast(now);
+        if (right && !lastRight) rightClicks.addLast(now);
         lastLeft = left;
         lastRight = right;
-        if (++clickWindowTicks >= 20) {
-            leftCps = rightCps = 0;
-            clickWindowTicks = 0;
-        }
+        pruneClicks(leftClicks, now);
+        pruneClicks(rightClicks, now);
     }
 
-    public static void render(GuiGraphics g) {
+    private static void pruneClicks(Deque<Long> clicks, long now) {\n        long cutoff = now - 1_000_000_000L;\n        while (!clicks.isEmpty() && clicks.peekFirst() < cutoff) clicks.removeFirst();\n    }\n\n    public static void render(GuiGraphics g) {
         Minecraft client = Minecraft.getInstance();
         if (client.player == null || client.options.hideGui) return;
         int y = 8;
@@ -41,7 +42,7 @@ public final class FeatureHud {
             g.drawString(client.font, "XYZ: " + p.getX() + " " + p.getY() + " " + p.getZ(), 8, y, 0xFFFFFF); y += 12;
         }
         if (AxiomClient.FEATURES.isEnabled("cps"))
-            g.drawString(client.font, "CPS: " + leftCps + " | " + rightCps, 8, y, 0xFFFFFF);
+            g.drawString(client.font, "CPS: " + leftClicks.size() + " | " + rightClicks.size(), 8, y, 0xFFFFFF);
         if (AxiomClient.FEATURES.isEnabled("keystrokes")) renderKeystrokes(g, client);
         if (AxiomClient.FEATURES.isEnabled("armor_hud")) renderArmor(g, client);
     }
