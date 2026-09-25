@@ -72,7 +72,7 @@ internal sealed class AxiomRuntimeManifest
     private static bool IsSafeAssetName(string value) =>
         !string.IsNullOrWhiteSpace(value) &&
         value.Length <= 128 &&
-        value.IndexOfAny(new[] { '/', '\' }) < 0 &&
+        value.IndexOfAny(new[] { '/', '\\' }) < 0 &&
         value != "." &&
         value != "..";
 
