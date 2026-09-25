@@ -229,7 +229,7 @@ public partial class MainWindow : Window
         var url = $"https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/{manifest.FabricApiVersion}/{fileName}";
         var checksumUrl = url + ".sha1";
 
-        var expectedSha1 = (await _httpClient.GetStringAsync(checksumUrl)).Trim().Split(' ', '\\t')[0];
+        var expectedSha1 = (await _httpClient.GetStringAsync(checksumUrl)).Trim().Split(' ', '\t')[0];
         if (expectedSha1.Length != 40 || expectedSha1.Any(c => !Uri.IsHexDigit(c)))
             throw new InvalidOperationException("Fabric API returned an invalid integrity checksum.");
 
