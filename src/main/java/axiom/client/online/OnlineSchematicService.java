@@ -14,6 +14,8 @@ import java.util.regex.*;
 public final class OnlineSchematicService {
     private static final String API="https://api.github.com";
     private final HttpClient http=HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(8)).build();
+    private static final long MAX_API_RESPONSE=2*1024*1024L;
+    private static final long MAX_DOWNLOAD_BYTES=32*1024*1024L;
     private final Path dir;
     public OnlineSchematicService(Path dir){this.dir=dir;}
     public List<Result> search(String query) throws IOException,InterruptedException {
@@ -35,7 +37,7 @@ public final class OnlineSchematicService {
         String url="https://raw.githubusercontent.com/"+r.repo()+"/"+r.branch()+"/"+r.path().replace(" ","%20");
         HttpRequest req=HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(20)).header("User-Agent","Axiom-Minecraft-Mod").GET().build();
         HttpResponse<byte[]> res=http.send(req,HttpResponse.BodyHandlers.ofByteArray()); if(res.statusCode()!=200)throw new IOException("Download failed: HTTP "+res.statusCode());
-        if(res.body().length>32*1024*1024)throw new IOException("Schematic is larger than 32 MB"); Path tmp=out.resolveSibling(out.getFileName()+".download");
+        if(res.body().length>MAX_DOWNLOAD_BYTES)throw new IOException("Schematic is larger than 32 MB"); Path tmp=out.resolveSibling(out.getFileName()+".download");
         try { Files.write(tmp,res.body(),StandardOpenOption.CREATE,StandardOpenOption.TRUNCATE_EXISTING); Files.move(tmp,out,StandardCopyOption.REPLACE_EXISTING,StandardCopyOption.ATOMIC_MOVE); }
         catch(AtomicMoveNotSupportedException e){ Files.move(tmp,out,StandardCopyOption.REPLACE_EXISTING); }
         catch(IOException e){ try{Files.deleteIfExists(tmp);}catch(IOException ignored){} throw e; }
@@ -46,7 +48,10 @@ public final class OnlineSchematicService {
         HttpRequest r=HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(10)).header("Accept","application/vnd.github+json").header("User-Agent","Axiom-Minecraft-Mod").GET().build();
         HttpResponse<String> x=http.send(r,HttpResponse.BodyHandlers.ofString());
         if(x.statusCode()==403 && x.headers().firstValue("X-RateLimit-Remaining").orElse("").equals("0")) throw new IOException("GitHub API rate limit reached");
-        if(x.statusCode()!=200)throw new IOException("Online search failed: HTTP "+x.statusCode()); return x.body();
+        if(x.statusCode()==429) throw new IOException("Online search rate limited; try again later");
+        if(x.statusCode()!=200)throw new IOException("Online search failed: HTTP "+x.statusCode());
+        if(x.body().length()>MAX_API_RESPONSE) throw new IOException("GitHub API response is too large");
+        return x.body();
     }
     public record Result(String name,String repo,String branch,String path){public String display(){return name+"  •  "+repo;}}
 }
