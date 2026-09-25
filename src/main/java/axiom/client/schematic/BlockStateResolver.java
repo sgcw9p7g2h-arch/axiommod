@@ -48,7 +48,7 @@ public final class BlockStateResolver {
         if (bracket<0) return state;
 
         int end=encoded.lastIndexOf(']');
-        if(end<bracket) return state;
+        if(end<bracket || end!=encoded.length()-1) return null;
 
         String body=encoded.substring(bracket+1,end);
         for(String part:split(body)) {
@@ -58,6 +58,7 @@ public final class BlockStateResolver {
             Property<?> property=find(state,name);
             if(property==null) continue;
             state=apply(state,property,value);
+            if(state==null) return null;
         }
         return state;
     }
@@ -70,7 +71,7 @@ public final class BlockStateResolver {
     @SuppressWarnings({"rawtypes","unchecked"})
     private static BlockState apply(BlockState state,Property property,String value){
         Optional parsed=property.getValue(value);
-        return parsed.isPresent()?state.setValue(property,(Comparable)parsed.get()):state;
+        return parsed.isPresent()?state.setValue(property,(Comparable)parsed.get()):null;
     }
 
     private static List<String> split(String s){
