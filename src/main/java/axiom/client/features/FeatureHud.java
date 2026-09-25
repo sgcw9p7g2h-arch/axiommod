@@ -10,6 +10,7 @@ import org.lwjgl.glfw.GLFW;
 public final class FeatureHud {
     private static boolean lastLeft, lastRight;
     private static int leftCps, rightCps, clickWindowTicks;
+    private static long lastLeftClickNanos, lastRightClickNanos;
 
     private FeatureHud() {}
 
@@ -18,8 +19,8 @@ public final class FeatureHud {
         long handle = client.getWindow().handle();
         boolean left = GLFW.glfwGetMouseButton(handle, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
         boolean right = GLFW.glfwGetMouseButton(handle, GLFW.GLFW_MOUSE_BUTTON_RIGHT) == GLFW.GLFW_PRESS;
-        if (left && !lastLeft) leftCps++;
-        if (right && !lastRight) rightCps++;
+        if (left && !lastLeft) { leftCps++; lastLeftClickNanos = System.nanoTime(); }
+        if (right && !lastRight) { rightCps++; lastRightClickNanos = System.nanoTime(); }
         lastLeft = left;
         lastRight = right;
         if (++clickWindowTicks >= 20) {
