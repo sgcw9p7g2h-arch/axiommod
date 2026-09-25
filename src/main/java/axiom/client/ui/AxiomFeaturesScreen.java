@@ -24,7 +24,14 @@ public final class AxiomFeaturesScreen extends Screen {
         int x = width / 2 - 155;
         int y = 48;
         int column = 0;
+        String currentCategory = "";
         for (AxiomFeature feature : all) {
+            if (!feature.category().equals(currentCategory)) {
+                if (column != 0) { column = 0; y += 30; }
+                currentCategory = feature.category();
+                addRenderableWidget(Button.builder(Component.literal("[" + currentCategory + "]"), b -> {}).bounds(x, y, 316, 20).build());
+                y += 24;
+            }
             int bx = x + column * 158;
             int by = y;
             Button button = Button.builder(label(feature), b -> {
