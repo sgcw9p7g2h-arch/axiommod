@@ -186,18 +186,16 @@ public partial class MainWindow : Window
             var fabricInstaller = new FabricInstaller(_httpClient);
             var fabricVersionName = await fabricInstaller.Install(_clientManifest.MinecraftVersion, _clientManifest.FabricLoaderVersion, path);
 
-            StatusText.Text = "Installing Fabric API...";
-            await EnsureFabricApiAsync(path, _clientManifest);
-
-            StatusText.Text = $"Installing Axiom {_clientManifest.ClientVersion}...";
-            await EnsureLatestAxiomModAsync(path, _clientManifest);
-
             if (!await IsRuntimeReadyAsync(path, _clientManifest))
             {
-                StatusText.Text = "Repairing Axiom runtime...";
+                StatusText.Text = "Preparing Axiom runtime...";
                 await EnsureFabricApiAsync(path, _clientManifest);
                 await EnsureLatestAxiomModAsync(path, _clientManifest);
                 await WriteRuntimeStateAsync(path, _clientManifest);
+            }
+            else
+            {
+                StatusText.Text = $"Axiom {_clientManifest.ClientVersion} runtime is ready.";
             }
 
             StatusText.Text = "Starting Axiom...";
@@ -319,6 +317,10 @@ public partial class MainWindow : Window
 
         var assetPath = Path.Combine(path.BasePath, "mods", manifest.ClientAsset);
         if (!File.Exists(assetPath))
+            return false;
+
+        var fabricApiPath = Path.Combine(path.BasePath, "mods", $"fabric-api-{manifest.FabricApiVersion}.jar");
+        if (!File.Exists(fabricApiPath))
             return false;
 
         var digest = await ComputeSha256Async(assetPath);
