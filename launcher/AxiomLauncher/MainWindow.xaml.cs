@@ -206,10 +206,12 @@ public partial class MainWindow : Window
 
             StatusText.Text = "Starting Axiom...";
             var process = await _gameRuntime.LaunchAsync(
-                _launcher,
-                fabricVersionName,
-                _session,
-                GetSelectedRamMb());
+                new AxiomGameLaunchRequest(
+                    gameDirectory,
+                    fabricVersionName,
+                    _session.Username,
+                    _session.AccessToken,
+                    GetSelectedRamMb()));
             process.Start();
 
             StatusText.Text = "Axiom started.";
