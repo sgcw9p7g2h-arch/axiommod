@@ -45,6 +45,12 @@ jobs:
         run: |
           if (-not (Test-Path build/libs/axiom.jar)) { throw 'axiom.jar was not produced.' }
           if (-not (Test-Path launcher-dist/AxiomLauncher.exe)) { throw 'AxiomLauncher.exe was not produced.' }
+          if (-not (Test-Path client/axiom-client.json)) { throw 'client/axiom-client.json was not produced.' }
+          $manifest = Get-Content client/axiom-client.json -Raw | ConvertFrom-Json
+          if ($manifest.clientAsset -ne 'axiom.jar') { throw "Manifest clientAsset must be axiom.jar, got '$($manifest.clientAsset)'." }
+          if ($manifest.launcherAsset -ne 'AxiomLauncher.exe') { throw "Manifest launcherAsset must be AxiomLauncher.exe, got '$($manifest.launcherAsset)'." }
+          if ([string]::IsNullOrWhiteSpace($manifest.clientVersion)) { throw 'Manifest clientVersion is missing.' }
+          if ([string]::IsNullOrWhiteSpace($manifest.minecraftVersion)) { throw 'Manifest minecraftVersion is missing.' }
 
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
