@@ -22,9 +22,8 @@ internal sealed class AxiomRuntimeManager
         if (!IsSafeAssetName(clientAsset))
             return false;
 
-        var statePath = GetStatePath(path);
-        var state = await ClientRuntimeState.LoadAsync(statePath);
-        if (state == null)
+        var runtimeManifest = await AxiomRuntimeManifest.LoadAsync(GetRuntimeManifestPath(path));
+        if (runtimeManifest == null)
             return false;
 
         var runtimeAssetPath = GetRuntimeAssetPath(path, clientAsset);
@@ -36,7 +35,13 @@ internal sealed class AxiomRuntimeManager
             return false;
 
         var digest = await ComputeSha256Async(runtimeAssetPath);
-        return state.Matches(clientVersion, minecraftVersion, fabricLoaderVersion, fabricApiVersion, clientAsset, digest);
+        return runtimeManifest.Matches(
+            clientVersion,
+            minecraftVersion,
+            fabricLoaderVersion,
+            fabricApiVersion,
+            clientAsset,
+            digest);
     }
 
     public async Task SaveStateAsync(MinecraftPath path, string clientVersion, string minecraftVersion,
@@ -127,7 +132,7 @@ internal sealed class AxiomRuntimeManager
     private static bool IsSafeAssetName(string value) =>
         !string.IsNullOrWhiteSpace(value) &&
         value.Length <= 128 &&
-        value.IndexOfAny(new[] { '/', '\' }) < 0 &&
+        value.IndexOfAny(new[] { '/', '\\' }) < 0 &&
         value != "." &&
         value != "..";
 
