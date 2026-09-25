@@ -186,7 +186,13 @@ public partial class MainWindow : Window
             StatusText.Text = $"Installing Axiom {_clientManifest.ClientVersion}...";
             await EnsureLatestAxiomModAsync(path, _clientManifest);
 
-            await WriteRuntimeStateAsync(path, _clientManifest);
+            if (!await IsRuntimeReadyAsync(path, _clientManifest))
+            {
+                StatusText.Text = "Repairing Axiom runtime...";
+                await EnsureFabricApiAsync(path, _clientManifest);
+                await EnsureLatestAxiomModAsync(path, _clientManifest);
+                await WriteRuntimeStateAsync(path, _clientManifest);
+            }
 
             StatusText.Text = "Starting Axiom...";
             var options = new MLaunchOption { Session = _session, MaximumRamMb = GetSelectedRamMb() };
