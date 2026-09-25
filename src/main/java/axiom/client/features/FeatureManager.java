@@ -24,7 +24,7 @@ public final class FeatureManager {
         register("fps","FPS Counter","HUD",true);
         register("fullbright","Fullbright","Visual",false);
         register("crosshair","Crosshair","Visual",true);
-        register("screenshot","Screenshot Tools","Utility",true);
+        register("screenshot","Screenshot Tools","Utility",true);\n        register("fps_graph","FPS Graph","HUD",false);\n        register("direction","Direction","HUD",false);
     }
     public void register(String id,String name,String category,boolean enabled){features.putIfAbsent(id,new AxiomFeature(id,name,category,enabled));}
     public Collection<AxiomFeature> all(){return features.values();}
