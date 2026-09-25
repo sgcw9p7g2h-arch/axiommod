@@ -236,7 +236,16 @@ public partial class MainWindow : Window
             throw new InvalidOperationException("The Axiom client manifest has no download URL.");
 
         var manifestJson = await _httpClient.GetStringAsync(downloadUrl);
+        var remoteDigest = asset.TryGetProperty("digest", out var digestElement) ? digestElement.GetString() : null;
         var manifest = JsonSerializer.Deserialize<ClientManifest>(manifestJson);
+        if (!string.IsNullOrWhiteSpace(remoteDigest))
+        {
+            var actualDigest = Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(manifestJson))).ToLowerInvariant();
+            var expectedDigest = remoteDigest.Replace("sha256:", "", StringComparison.OrdinalIgnoreCase);
+            if (!string.Equals(actualDigest, expectedDigest, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("The downloaded Axiom client manifest failed its SHA-256 integrity check.");
+        }
+
         if (manifest == null || string.IsNullOrWhiteSpace(manifest.MinecraftVersion) ||
             string.IsNullOrWhiteSpace(manifest.FabricLoaderVersion) ||
             string.IsNullOrWhiteSpace(manifest.FabricApiVersion) ||
