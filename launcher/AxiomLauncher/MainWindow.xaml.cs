@@ -99,6 +99,7 @@ public partial class MainWindow : Window
             SaveSettings();
 
             var path = new MinecraftPath(gameDirectory);
+            await using var runtimeLock = await _runtimeManager.AcquireLockAsync(path);
             _launcher = new MinecraftLauncher(path);
             _clientManifest = await LoadClientManifestAsync();
 
@@ -166,6 +167,7 @@ public partial class MainWindow : Window
             GameDirBox.Text = gameDirectory;
             SaveSettings();
             var path = new MinecraftPath(gameDirectory);
+            await using var runtimeLock = await _runtimeManager.AcquireLockAsync(path);
             _launcher = new MinecraftLauncher(path);
             _launcher.FileProgressChanged += (_, args) =>
             {
