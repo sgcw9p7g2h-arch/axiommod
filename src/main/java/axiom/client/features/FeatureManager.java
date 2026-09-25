@@ -31,6 +31,9 @@ public final class FeatureManager {
         register("server_address","Server Address","HUD",false);
         register("held_item","Held Item","HUD",false);
         register("potion_effects","Potion Effects","HUD",false);
+        register("item_durability","Item Durability","HUD",false);
+        register("ping","Ping","HUD",false);
+        register("hotbar_overlay","Hotbar Overlay","HUD",false);
         register("snaplook","Snaplook","Visual",false);
         register("freelook","Freelook","Visual",false);
         register("client_name","Client Name","HUD",true);
