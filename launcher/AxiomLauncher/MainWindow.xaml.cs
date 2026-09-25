@@ -20,7 +20,6 @@ public partial class MainWindow : Window
     private const string LauncherAssetName = "AxiomLauncher.exe";
     private ClientManifest? _clientManifest;
     private readonly AxiomRuntimeManager _runtimeManager = new();
-    private readonly IAxiomGameRuntime _gameRuntime = new FabricGameRuntime();
 
     private MinecraftLauncher? _launcher;
     private MSession? _session;
@@ -205,7 +204,8 @@ public partial class MainWindow : Window
                 throw new InvalidOperationException($"Fabric returned an unexpected runtime version: {fabricVersionName}.");
 
             StatusText.Text = "Starting Axiom...";
-            var process = await _gameRuntime.LaunchAsync(
+            var gameRuntime = AxiomGameRuntimeFactory.Create(_clientManifest.Runtime);
+            var process = await gameRuntime.LaunchAsync(
                 new AxiomGameLaunchRequest(
                     gameDirectory,
                     fabricVersionName,
@@ -379,6 +379,7 @@ public partial class MainWindow : Window
             !IsValidVersion(manifest.MinecraftVersion) ||
             !IsValidVersion(manifest.FabricLoaderVersion) ||
             !IsValidVersion(manifest.FabricApiVersion) ||
+            !IsValidRuntime(manifest.Runtime) ||
             !IsSafeAssetName(manifest.ClientAsset) ||
             !manifest.ClientAsset.EndsWith(".jar", StringComparison.OrdinalIgnoreCase) ||
             !IsSafeAssetName(manifest.LauncherAsset) ||
@@ -387,6 +388,11 @@ public partial class MainWindow : Window
 
         return manifest;
     }
+
+    private static bool IsValidRuntime(string value) =>
+        !string.IsNullOrWhiteSpace(value) &&
+        value.Length <= 32 &&
+        value.All(c => char.IsLetterOrDigit(c) || c is '-' or '_' or '.');
 
     private static bool IsValidVersion(string value)
     {
