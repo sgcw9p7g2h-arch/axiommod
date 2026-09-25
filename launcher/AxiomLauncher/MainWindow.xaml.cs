@@ -114,7 +114,10 @@ public partial class MainWindow : Window
             };
 
             _clientManifest = await LoadClientManifestAsync();
-            StatusText.Text = $"Installing Minecraft {_clientManifest.MinecraftVersion}...";
+            VersionBox.Items.Clear();
+            VersionBox.Items.Add(_clientManifest.MinecraftVersion);
+            VersionBox.SelectedIndex = 0;
+            StatusText.Text = $"Axiom {_clientManifest.ClientVersion} • Minecraft {_clientManifest.MinecraftVersion}";
             await _launcher.InstallAsync(_clientManifest.MinecraftVersion);
 
             StatusText.Text = $"Installing Fabric Loader {_clientManifest.FabricLoaderVersion}...";
@@ -124,7 +127,7 @@ public partial class MainWindow : Window
             StatusText.Text = "Installing Fabric API...";
             await EnsureFabricApiAsync(path, _clientManifest);
 
-            StatusText.Text = "Installing Axiom Client...";
+            StatusText.Text = $"Installing Axiom {_clientManifest.ClientVersion}...";
             await EnsureLatestAxiomModAsync(path, _clientManifest);
 
             StatusText.Text = "Starting Axiom...";
@@ -160,6 +163,9 @@ public partial class MainWindow : Window
 
     private async Task EnsureLatestAxiomModAsync(MinecraftPath path, ClientManifest manifest)
     {
+        if (!IsSafeAssetName(manifest.ClientAsset))
+            throw new InvalidOperationException("The Axiom client asset name is invalid.");
+
         var releaseJson = await _httpClient.GetStringAsync(LatestReleaseApi);
         using var document = JsonDocument.Parse(releaseJson);
         if (!document.RootElement.TryGetProperty("assets", out var assets))
@@ -237,7 +243,6 @@ public partial class MainWindow : Window
 
         var manifestJson = await _httpClient.GetStringAsync(downloadUrl);
         var remoteDigest = asset.TryGetProperty("digest", out var digestElement) ? digestElement.GetString() : null;
-        var manifest = JsonSerializer.Deserialize<ClientManifest>(manifestJson);
         if (!string.IsNullOrWhiteSpace(remoteDigest))
         {
             var actualDigest = Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(manifestJson))).ToLowerInvariant();
@@ -246,14 +251,25 @@ public partial class MainWindow : Window
                 throw new InvalidOperationException("The downloaded Axiom client manifest failed its SHA-256 integrity check.");
         }
 
-        if (manifest == null || string.IsNullOrWhiteSpace(manifest.MinecraftVersion) ||
+        var manifest = JsonSerializer.Deserialize<ClientManifest>(manifestJson);
+        if (manifest == null || string.IsNullOrWhiteSpace(manifest.ClientVersion) ||
+            string.IsNullOrWhiteSpace(manifest.MinecraftVersion) ||
             string.IsNullOrWhiteSpace(manifest.FabricLoaderVersion) ||
             string.IsNullOrWhiteSpace(manifest.FabricApiVersion) ||
-            string.IsNullOrWhiteSpace(manifest.ClientAsset))
+            !IsSafeAssetName(manifest.ClientAsset))
             throw new InvalidOperationException("The Axiom client manifest is invalid.");
+
+        if (!string.IsNullOrWhiteSpace(manifest.LauncherAsset) && !IsSafeAssetName(manifest.LauncherAsset))
+            throw new InvalidOperationException("The Axiom launcher asset name is invalid.");
 
         return manifest;
     }
+
+    private static bool IsSafeAssetName(string value) =>
+        !string.IsNullOrWhiteSpace(value) &&
+        value.IndexOfAny(new[] { '/', '\' }) < 0 &&
+        value != "." &&
+        value != "..";
 
     private async Task DownloadFileAsync(string url, string destination)
     {
@@ -413,7 +429,6 @@ public partial class MainWindow : Window
             }
             if (settings.Profiles?.Length != MaxProfiles && (settings.GameDirectory is not null || settings.RamMb > 0))
             {
-                // Migrate the pre-profile settings format into Profile 1.
                 _profiles[0].GameDirectory = string.IsNullOrWhiteSpace(settings.GameDirectory)
                     ? GameDirBox.Text
                     : settings.GameDirectory;
@@ -469,8 +484,6 @@ public partial class MainWindow : Window
     {
         public LauncherProfile[] Profiles { get; set; } = Array.Empty<LauncherProfile>();
         public int SelectedProfile { get; set; }
-
-        // Legacy settings fields retained so older Axiom installs migrate cleanly.
         public string? GameDirectory { get; set; }
         public int RamMb { get; set; }
     }
