@@ -24,10 +24,10 @@ public final class LitematicImporter {
             NbtReader.NbtList palette=region.list("BlockStatePalette"); if(palette==null) palette=region.list("Palette");
             long[] states=region.longArray("BlockStates"); if(palette==null||states==null) continue;
             List<String> paletteStates=new ArrayList<>();
-            for(Object entry:palette.values()) paletteStates.add(paletteState((NbtReader.NbtCompound)entry));
+            for(Object entry:palette.values()) { if(!(entry instanceof NbtReader.NbtCompound compound)) throw new IOException("Invalid block-state palette entry"); paletteStates.add(paletteState(compound)); }
             if(paletteStates.isEmpty()) continue;
             int bits=Math.max(2,32-Integer.numberOfLeadingZeros(paletteStates.size()-1)); if(bits>32) throw new IOException("Invalid palette width");
-            long totalLong=(long)ax*ay*az; if(totalLong>10_000_000L) throw new IOException("Schematic is too large: "+totalLong+" blocks"); int total=(int)totalLong; for(int index=0;index<total;index++) {
+            long totalLong=(long)ax*ay*az; if(totalLong>10_000_000L) throw new IOException("Schematic is too large: "+totalLong+" blocks"); int total=(int)totalLong; long packedBits=totalLong*bits; long requiredLongs=(packedBits+63L)/64L; if(requiredLongs>Integer.MAX_VALUE || states.length<requiredLongs) throw new IOException("BlockStates array is truncated"); for(int index=0;index<total;index++) {
                 int paletteIndex=readPacked(states,index,bits); if(paletteIndex<0||paletteIndex>=paletteStates.size()) continue;
                 String state=paletteStates.get(paletteIndex); if(state.startsWith("minecraft:air")) continue;
                 int x=index%ax; int yz=index/ax; int z=yz%az; int y=yz/az;
