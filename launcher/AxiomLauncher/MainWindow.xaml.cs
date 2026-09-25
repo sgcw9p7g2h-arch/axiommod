@@ -212,7 +212,7 @@ public partial class MainWindow : Window
                 GetSelectedRamMb());
             process.Start();
 
-            StatusText.Text = "Axiom started."
+            StatusText.Text = "Axiom started.";
             Close();
         }
         catch (Exception ex)
