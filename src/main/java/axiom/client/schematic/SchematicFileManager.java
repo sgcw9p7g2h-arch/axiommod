@@ -22,7 +22,7 @@ public final class SchematicFileManager {
             Files.createDirectories(dir);
             try (var stream = Files.list(dir)) {
                 stream.filter(p -> { String n=p.getFileName().toString().toLowerCase(java.util.Locale.ROOT); return n.endsWith(".axschem") || n.endsWith(".litematic"); })
-                        .sorted()
+                        .sorted(java.util.Comparator.comparing(p -> p.getFileName().toString().toLowerCase(java.util.Locale.ROOT)))
                         .forEach(path -> {
                             try {
                                 loaded.add(loadAny(path));
