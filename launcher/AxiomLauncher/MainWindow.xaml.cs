@@ -179,7 +179,7 @@ public partial class MainWindow : Window
             VersionBox.Items.Clear();
             VersionBox.Items.Add(_clientManifest.MinecraftVersion);
             VersionBox.SelectedIndex = 0;
-            StatusText.Text = $"Axiom {_clientManifest.ClientVersion} • Minecraft {_clientManifest.MinecraftVersion}";
+            await SetRuntimeStatusAsync(path, _clientManifest);
             await _launcher.InstallAsync(_clientManifest.MinecraftVersion);
 
             StatusText.Text = $"Installing Fabric Loader {_clientManifest.FabricLoaderVersion}...";
