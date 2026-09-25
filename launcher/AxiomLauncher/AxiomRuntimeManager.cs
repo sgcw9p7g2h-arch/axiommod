@@ -54,6 +54,32 @@ internal sealed class AxiomRuntimeManager
             clientVersion, minecraftVersion, fabricLoaderVersion, fabricApiVersion, clientAsset, digest);
 
         await state.SaveAsync(GetStatePath(path));
+
+        var runtimeManifest = AxiomRuntimeManifest.FromRuntimeState(state);
+        await runtimeManifest.SaveAsync(GetRuntimeManifestPath(path));
+    }
+
+    public async Task<FileStream> AcquireLockAsync(MinecraftPath path, CancellationToken cancellationToken = default)
+    {
+        var lockPath = GetRuntimeLockPath(path);
+        var directory = Path.GetDirectoryName(lockPath);
+        if (!string.IsNullOrEmpty(directory))
+            Directory.CreateDirectory(directory);
+
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(30);
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            try
+            {
+                return new FileStream(lockPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+            }
+            catch (IOException) when (DateTime.UtcNow < deadline)
+            {
+                await Task.Delay(250, cancellationToken);
+            }
+        }
     }
 
     public static string GetClientAssetPath(MinecraftPath path, string clientAsset)
@@ -79,7 +105,7 @@ internal sealed class AxiomRuntimeManager
     private static bool IsSafeAssetName(string value) =>
         !string.IsNullOrWhiteSpace(value) &&
         value.Length <= 128 &&
-        value.IndexOfAny(new[] { '/', '\\' }) < 0 &&
+        value.IndexOfAny(new[] { '/', '\' }) < 0 &&
         value != "." &&
         value != "..";
 
