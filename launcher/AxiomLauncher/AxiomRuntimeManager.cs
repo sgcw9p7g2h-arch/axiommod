@@ -70,6 +70,12 @@ internal sealed class AxiomRuntimeManager
     public static string GetRuntimeStatePath(MinecraftPath path) =>
         Path.Combine(path.BasePath, StateDirectoryName, StateFileName);
 
+    public static string GetRuntimeManifestPath(MinecraftPath path) =>
+        Path.Combine(GetRuntimeDirectory(path), "runtime.json");
+
+    public static string GetRuntimeLockPath(MinecraftPath path) =>
+        Path.Combine(GetRuntimeDirectory(path), "runtime.lock");
+
     private static bool IsSafeAssetName(string value) =>
         !string.IsNullOrWhiteSpace(value) &&
         value.Length <= 128 &&
