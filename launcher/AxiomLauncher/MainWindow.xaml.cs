@@ -226,9 +226,29 @@ public partial class MainWindow : Window
         var fileName = $"fabric-api-{manifest.FabricApiVersion}.jar";
         var destination = AxiomRuntimeManager.GetRuntimeAssetPath(path, fileName);
         var url = $"https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/{manifest.FabricApiVersion}/{fileName}";
+        var checksumUrl = url + ".sha1";
 
-        if (!File.Exists(destination))
+        var expectedSha1 = (await _httpClient.GetStringAsync(checksumUrl)).Trim().Split(' ', '\\t')[0];
+        if (expectedSha1.Length != 40 || expectedSha1.Any(c => !Uri.IsHexDigit(c)))
+            throw new InvalidOperationException("Fabric API returned an invalid integrity checksum.");
+
+        var needsDownload = !File.Exists(destination);
+        if (!needsDownload)
+        {
+            var localSha1 = await ComputeSha1Async(destination);
+            needsDownload = !string.Equals(localSha1, expectedSha1, StringComparison.OrdinalIgnoreCase);
+        }
+
+        if (needsDownload)
+        {
             await DownloadFileAsync(url, destination);
+            var actualSha1 = await ComputeSha1Async(destination);
+            if (!string.Equals(actualSha1, expectedSha1, StringComparison.OrdinalIgnoreCase))
+            {
+                File.Delete(destination);
+                throw new InvalidOperationException("The downloaded Fabric API failed its SHA-1 integrity check.");
+            }
+        }
 
         AxiomRuntimeManager.StageRuntimeAsset(path, fileName);
     }
@@ -413,6 +433,12 @@ public partial class MainWindow : Window
     {
         await using var stream = File.OpenRead(path);
         return Convert.ToHexString(await SHA256.HashDataAsync(stream)).ToLowerInvariant();
+    }
+
+    private static async Task<string> ComputeSha1Async(string path)
+    {
+        await using var stream = File.OpenRead(path);
+        return Convert.ToHexString(await SHA1.HashDataAsync(stream)).ToLowerInvariant();
     }
 
     private int GetSelectedRamMb() => RamBox.SelectedIndex switch
