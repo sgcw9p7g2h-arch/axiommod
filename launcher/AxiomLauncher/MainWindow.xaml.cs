@@ -20,6 +20,7 @@ public partial class MainWindow : Window
     private const string ClientManifestAssetName = "axiom-client.json";
     private const string LauncherAssetName = "AxiomLauncher.exe";
     private ClientManifest? _clientManifest;
+    private readonly AxiomRuntimeManager _runtimeManager = new();
 
     private MinecraftLauncher? _launcher;
     private MSession? _session;
@@ -287,54 +288,23 @@ public partial class MainWindow : Window
         }
     }
 
-    private async Task WriteRuntimeStateAsync(MinecraftPath path, ClientManifest manifest)
-    {
-        if (!IsSafeAssetName(manifest.ClientAsset))
-            throw new InvalidOperationException("The Axiom client asset name is invalid.");
-
-        var assetPath = Path.Combine(path.BasePath, "mods", manifest.ClientAsset);
-        if (!File.Exists(assetPath))
-            throw new InvalidOperationException("The Axiom client asset is missing after installation.");
-
-        var digest = await ComputeSha256Async(assetPath);
-        var state = ClientRuntimeState.FromManifest(
+    private Task WriteRuntimeStateAsync(MinecraftPath path, ClientManifest manifest) =>
+        _runtimeManager.SaveStateAsync(
+            path,
             manifest.ClientVersion,
             manifest.MinecraftVersion,
             manifest.FabricLoaderVersion,
             manifest.FabricApiVersion,
-            manifest.ClientAsset,
-            digest);
+            manifest.ClientAsset);
 
-        await state.SaveAsync(Path.Combine(path.BasePath, ".axiom", "client-state.json"));
-    }
-
-    private async Task<bool> IsRuntimeReadyAsync(MinecraftPath path, ClientManifest manifest)
-    {
-        if (!IsSafeAssetName(manifest.ClientAsset))
-            return false;
-
-        var statePath = Path.Combine(path.BasePath, ".axiom", "client-state.json");
-        var state = await ClientRuntimeState.LoadAsync(statePath);
-        if (state == null)
-            return false;
-
-        var assetPath = Path.Combine(path.BasePath, "mods", manifest.ClientAsset);
-        if (!File.Exists(assetPath))
-            return false;
-
-        var fabricApiPath = Path.Combine(path.BasePath, "mods", $"fabric-api-{manifest.FabricApiVersion}.jar");
-        if (!File.Exists(fabricApiPath))
-            return false;
-
-        var digest = await ComputeSha256Async(assetPath);
-        return state.Matches(
+    private Task<bool> IsRuntimeReadyAsync(MinecraftPath path, ClientManifest manifest) =>
+        _runtimeManager.IsReadyAsync(
+            path,
             manifest.ClientVersion,
             manifest.MinecraftVersion,
             manifest.FabricLoaderVersion,
             manifest.FabricApiVersion,
-            manifest.ClientAsset,
-            digest);
-    }
+            manifest.ClientAsset);
 
     private async Task<ClientManifest> LoadClientManifestAsync()
     {
