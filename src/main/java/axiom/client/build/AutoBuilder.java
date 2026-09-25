@@ -9,6 +9,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -162,9 +163,12 @@ public final class AutoBuilder {
             BlockHitResult hit = new BlockHitResult(
                     hitLocation, face, neighbor, false);
 
-            client.gameMode.useItemOn(player, InteractionHand.MAIN_HAND, hit);
-            player.swing(InteractionHand.MAIN_HAND);
-            return true;
+            InteractionResult result =
+                    client.gameMode.useItemOn(player, InteractionHand.MAIN_HAND, hit);
+            if (result.consumesAction()) {
+                player.swing(InteractionHand.MAIN_HAND);
+                return true;
+            }
         }
         return false;
     }
