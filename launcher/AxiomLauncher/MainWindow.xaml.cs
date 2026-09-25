@@ -36,6 +36,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        _httpClient.Timeout = TimeSpan.FromMinutes(10);
         _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("AxiomLauncher/0.1");
         _httpClient.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
 
@@ -395,9 +396,19 @@ public partial class MainWindow : Window
             if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
             SaveCurrentProfile();
             var settings = new LauncherSettings { Profiles = _profiles, SelectedProfile = _selectedProfileIndex };
-            File.WriteAllText(_settingsFile, JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true }));
+            var temporary = _settingsFile + ".tmp";
+            File.WriteAllText(temporary, JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true }));
+            File.Move(temporary, _settingsFile, true);
         }
-        catch { }
+        catch
+        {
+            try
+            {
+                var temporary = _settingsFile + ".tmp";
+                if (File.Exists(temporary)) File.Delete(temporary);
+            }
+            catch { }
+        }
     }
 
     private sealed class LauncherSettings
