@@ -27,6 +27,12 @@ public final class FeatureManager {
         register("screenshot","Screenshot Tools","Utility",true);
         register("fps_graph","FPS Graph","HUD",false);
         register("direction","Direction","HUD",false);
+        register("playtime","Playtime","HUD",false);
+        register("server_address","Server Address","HUD",false);
+        register("held_item","Held Item","HUD",false);
+        register("potion_effects","Potion Effects","HUD",false);
+        register("snaplook","Snaplook","Visual",false);
+        register("freelook","Freelook","Visual",false);
     }
     public void register(String id,String name,String category,boolean enabled){features.putIfAbsent(id,new AxiomFeature(id,name,category,enabled));}
     public Collection<AxiomFeature> all(){return features.values();}
