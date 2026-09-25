@@ -593,22 +593,37 @@ public partial class MainWindow : Window
 
     private void SaveSettings()
     {
+        var directory = Path.GetDirectoryName(_settingsFile);
+        if (!string.IsNullOrEmpty(directory))
+            Directory.CreateDirectory(directory);
+
+        SaveCurrentProfile();
+
+        foreach (var profile in _profiles)
+        {
+            profile.Name = string.IsNullOrWhiteSpace(profile.Name) ? "Profile" : profile.Name.Trim();
+            profile.Name = profile.Name.Length > 64 ? profile.Name[..64] : profile.Name;
+            profile.RamMb = profile.RamMb is 2048 or 4096 or 6144 or 8192 ? profile.RamMb : 4096;
+            if (!string.IsNullOrWhiteSpace(profile.GameDirectory))
+                profile.GameDirectory = Path.GetFullPath(profile.GameDirectory.Trim());
+        }
+
+        _selectedProfileIndex = Math.Clamp(_selectedProfileIndex, 0, MaxProfiles - 1);
+        var settings = new LauncherSettings { Profiles = _profiles, SelectedProfile = _selectedProfileIndex };
+        var temporary = _settingsFile + ".tmp";
         try
         {
-            var directory = Path.GetDirectoryName(_settingsFile);
-            if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
-            SaveCurrentProfile();
-            var settings = new LauncherSettings { Profiles = _profiles, SelectedProfile = _selectedProfileIndex };
-            var temporary = _settingsFile + ".tmp";
-            File.WriteAllText(temporary, JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true }));
+            File.WriteAllText(
+                temporary,
+                JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true }));
             File.Move(temporary, _settingsFile, true);
         }
         catch
         {
             try
             {
-                var temporary = _settingsFile + ".tmp";
-                if (File.Exists(temporary)) File.Delete(temporary);
+                if (File.Exists(temporary))
+                    File.Delete(temporary);
             }
             catch { }
         }
