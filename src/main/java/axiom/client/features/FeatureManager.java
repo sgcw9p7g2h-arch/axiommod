@@ -34,6 +34,11 @@ public final class FeatureManager {
         register("item_durability","Item Durability","HUD",false);
         register("ping","Ping","HUD",false);
         register("hotbar_overlay","Hotbar Overlay","HUD",false);
+        register("saturation","Saturation","HUD",false);
+        register("item_tracker","Item Tracker","HUD",false);
+        register("light_overlay","Light Overlay","HUD",false);
+        register("action_bar","Action Bar","HUD",false);
+        register("fps_boost","Performance Boost","Performance",false);
         register("snaplook","Snaplook","Visual",false);
         register("freelook","Freelook","Visual",false);
         register("client_name","Client Name","HUD",true);
