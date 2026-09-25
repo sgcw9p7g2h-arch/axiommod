@@ -264,16 +264,17 @@ public partial class MainWindow : Window
             throw new InvalidOperationException("The Axiom release asset has no download URL.");
 
         var remoteDigest = asset.TryGetProperty("digest", out var digestElement) ? digestElement.GetString() : null;
-        var modsDirectory = Path.Combine(path.BasePath, "mods");
-        Directory.CreateDirectory(modsDirectory);
-        var destination = Path.Combine(modsDirectory, manifest.ClientAsset);
+        var destination = AxiomRuntimeManager.GetRuntimeAssetPath(path, manifest.ClientAsset);
 
         if (!string.IsNullOrWhiteSpace(remoteDigest) && File.Exists(destination))
         {
             var localDigest = await ComputeSha256Async(destination);
             if (string.Equals(localDigest, remoteDigest.Replace("sha256:", "", StringComparison.OrdinalIgnoreCase),
                 StringComparison.OrdinalIgnoreCase))
+            {
+                AxiomRuntimeManager.StageClientAsset(path, manifest.ClientAsset);
                 return;
+            }
         }
 
         await DownloadFileAsync(downloadUrl, destination);
@@ -288,6 +289,8 @@ public partial class MainWindow : Window
                 throw new InvalidOperationException("The downloaded Axiom client failed its SHA-256 integrity check.");
             }
         }
+
+        AxiomRuntimeManager.StageClientAsset(path, manifest.ClientAsset);
     }
 
     private Task WriteRuntimeStateAsync(MinecraftPath path, ClientManifest manifest) =>
