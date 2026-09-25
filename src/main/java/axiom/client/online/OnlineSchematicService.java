@@ -42,6 +42,11 @@ public final class OnlineSchematicService {
         return out;
     }
     public SchematicEngine importDownloaded(Path path) throws IOException{return new LitematicImporter().load(path);}
-    private String get(String url) throws IOException,InterruptedException { HttpRequest r=HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(10)).header("Accept","application/vnd.github+json").header("User-Agent","Axiom-Minecraft-Mod").GET().build(); HttpResponse<String> x=http.send(r,HttpResponse.BodyHandlers.ofString()); if(x.statusCode()!=200)throw new IOException("Online search failed: HTTP "+x.statusCode()); return x.body(); }
+    private String get(String url) throws IOException,InterruptedException {
+        HttpRequest r=HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(10)).header("Accept","application/vnd.github+json").header("User-Agent","Axiom-Minecraft-Mod").GET().build();
+        HttpResponse<String> x=http.send(r,HttpResponse.BodyHandlers.ofString());
+        if(x.statusCode()==403 && x.headers().firstValue("X-RateLimit-Remaining").orElse("").equals("0")) throw new IOException("GitHub API rate limit reached");
+        if(x.statusCode()!=200)throw new IOException("Online search failed: HTTP "+x.statusCode()); return x.body();
+    }
     public record Result(String name,String repo,String branch,String path){public String display(){return name+"  •  "+repo;}}
 }
