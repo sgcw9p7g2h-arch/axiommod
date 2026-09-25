@@ -21,6 +21,7 @@ public partial class MainWindow : Window
     private const string LauncherAssetName = "AxiomLauncher.exe";
     private ClientManifest? _clientManifest;
     private readonly AxiomRuntimeManager _runtimeManager = new();
+    private readonly IAxiomGameRuntime _gameRuntime = new FabricGameRuntime();
 
     private MinecraftLauncher? _launcher;
     private MSession? _session;
