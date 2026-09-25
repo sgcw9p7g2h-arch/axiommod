@@ -63,6 +63,12 @@ internal sealed class AxiomRuntimeManager
         return Path.Combine(GetModsDirectory(path), clientAsset);
     }
 
+    public static string GetRuntimeStatePath(MinecraftPath path) =>
+        GetStatePath(path);
+
+    public static string GetRuntimeDirectory(MinecraftPath path) =>
+        Path.Combine(path.BasePath, StateDirectoryName);
+
     private static bool IsSafeAssetName(string value) =>
         !string.IsNullOrWhiteSpace(value) &&
         value.Length <= 128 &&
