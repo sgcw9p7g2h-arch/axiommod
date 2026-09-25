@@ -250,7 +250,7 @@ public partial class MainWindow : Window
             }
         }
 
-        AxiomRuntimeManager.StageRuntimeAsset(path, fileName);
+        await AxiomRuntimeManager.StageRuntimeAssetAsync(path, fileName);
     }
 
     private async Task EnsureLatestAxiomModAsync(MinecraftPath path, ClientManifest manifest)
@@ -290,7 +290,7 @@ public partial class MainWindow : Window
             if (string.Equals(localDigest, remoteDigest.Replace("sha256:", "", StringComparison.OrdinalIgnoreCase),
                 StringComparison.OrdinalIgnoreCase))
             {
-                AxiomRuntimeManager.StageRuntimeAsset(path, manifest.ClientAsset);
+                await AxiomRuntimeManager.StageRuntimeAssetAsync(path, manifest.ClientAsset);
                 return;
             }
         }
@@ -308,7 +308,7 @@ public partial class MainWindow : Window
             }
         }
 
-        AxiomRuntimeManager.StageRuntimeAsset(path, manifest.ClientAsset);
+        await AxiomRuntimeManager.StageRuntimeAssetAsync(path, manifest.ClientAsset);
     }
 
     private Task WriteRuntimeStateAsync(MinecraftPath path, ClientManifest manifest) =>
