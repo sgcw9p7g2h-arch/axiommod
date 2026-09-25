@@ -59,7 +59,9 @@ public final class LitematicImporter {
             int total=(int)totalLong;
             for(int index=0;index<total;index++) {
                 int paletteIndex=readPacked(states,index,bits);
-                if(paletteIndex<0||paletteIndex>=paletteStates.size()) continue;
+                if(paletteIndex<0||paletteIndex>=paletteStates.size()) {
+                    throw new IOException("Invalid block-state palette index: "+paletteIndex);
+                }
                 String state=paletteStates.get(paletteIndex);
                 if(state.startsWith("minecraft:air")) continue;
                 int x=index%(int)ax, yz=index/(int)ax, z=yz%(int)az, y=yz/(int)az;
