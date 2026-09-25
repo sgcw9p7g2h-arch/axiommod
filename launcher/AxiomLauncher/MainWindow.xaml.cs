@@ -18,6 +18,7 @@ public partial class MainWindow : Window
 {
     private const string LatestReleaseApi = "https://api.github.com/repos/sgcw9p7g2h-arch/axiommod/releases/latest";
     private const string ClientManifestAssetName = "axiom-client.json";
+    private const string LauncherAssetName = "AxiomLauncher.exe";
     private ClientManifest? _clientManifest;
 
     private MinecraftLauncher? _launcher;
