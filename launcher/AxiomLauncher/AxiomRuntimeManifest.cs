@@ -40,7 +40,7 @@ internal sealed class AxiomRuntimeManifest
         string clientAssetSha256,
         string fabricApiAsset,
         string fabricApiAssetSha256) =>
-        SchemaVersion == 2 &&
+        IsValid() &&
         string.Equals(ClientVersion, clientVersion, StringComparison.Ordinal) &&
         string.Equals(MinecraftVersion, minecraftVersion, StringComparison.Ordinal) &&
         string.Equals(FabricLoaderVersion, fabricLoaderVersion, StringComparison.Ordinal) &&
@@ -48,8 +48,30 @@ internal sealed class AxiomRuntimeManifest
         string.Equals(ClientAsset, clientAsset, StringComparison.Ordinal) &&
         string.Equals(ClientAssetSha256, clientAssetSha256, StringComparison.OrdinalIgnoreCase) &&
         string.Equals(FabricApiAsset, fabricApiAsset, StringComparison.Ordinal) &&
-        string.Equals(FabricApiAssetSha256, fabricApiAssetSha256, StringComparison.OrdinalIgnoreCase) &&
+        string.Equals(FabricApiAssetSha256, fabricApiAssetSha256, StringComparison.OrdinalIgnoreCase);
+
+    private bool IsValid() =>
+        SchemaVersion == 2 &&
+        IsSafeAssetName(ClientAsset) &&
+        ClientAsset.EndsWith(".jar", StringComparison.OrdinalIgnoreCase) &&
+        IsSafeAssetName(FabricApiAsset) &&
+        FabricApiAsset.EndsWith(".jar", StringComparison.OrdinalIgnoreCase) &&
+        IsSha256(ClientAssetSha256) &&
+        IsSha256(FabricApiAssetSha256) &&
         InstalledAtUtc != default;
+
+    private static bool IsSafeAssetName(string value) =>
+        !string.IsNullOrWhiteSpace(value) &&
+        value.Length <= 128 &&
+        value.IndexOfAny(new[] { '/', '\\' }) < 0 &&
+        value != "." &&
+        value != "..";
+
+    private static bool IsSha256(string value) =>
+        value.Length == 64 && value.All(c =>
+            (c >= '0' && c <= '9') ||
+            (c >= 'a' && c <= 'f') ||
+            (c >= 'A' && c <= 'F'));
 
     public static async Task<AxiomRuntimeManifest?> LoadAsync(string path)
     {
