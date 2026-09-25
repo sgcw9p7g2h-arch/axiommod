@@ -5,7 +5,15 @@ namespace AxiomLauncher;
 
 internal sealed class AxiomRuntimeManager
 {
-    private readonly string _clientStateFileName = Path.Combine(".axiom", "client-state.json");
+    private const string StateDirectoryName = ".axiom";
+    private const string StateFileName = "client-state.json";
+    private const string ModsDirectoryName = "mods";
+
+    private static string GetStatePath(MinecraftPath path) =>
+        Path.Combine(path.BasePath, StateDirectoryName, StateFileName);
+
+    private static string GetModsDirectory(MinecraftPath path) =>
+        Path.Combine(path.BasePath, ModsDirectoryName);
 
     public async Task<bool> IsReadyAsync(MinecraftPath path, string clientVersion, string minecraftVersion,
         string fabricLoaderVersion, string fabricApiVersion, string clientAsset)
@@ -13,7 +21,7 @@ internal sealed class AxiomRuntimeManager
         if (!IsSafeAssetName(clientAsset))
             return false;
 
-        var statePath = Path.Combine(path.BasePath, _clientStateFileName);
+        var statePath = GetStatePath(path);
         var state = await ClientRuntimeState.LoadAsync(statePath);
         if (state == null)
             return false;
@@ -22,7 +30,7 @@ internal sealed class AxiomRuntimeManager
         if (!File.Exists(assetPath))
             return false;
 
-        var fabricApiPath = Path.Combine(path.BasePath, "mods", $"fabric-api-{fabricApiVersion}.jar");
+        var fabricApiPath = Path.Combine(GetModsDirectory(path), $"fabric-api-{fabricApiVersion}.jar");
         if (!File.Exists(fabricApiPath))
             return false;
 
@@ -44,7 +52,7 @@ internal sealed class AxiomRuntimeManager
         var state = ClientRuntimeState.FromManifest(
             clientVersion, minecraftVersion, fabricLoaderVersion, fabricApiVersion, clientAsset, digest);
 
-        await state.SaveAsync(Path.Combine(path.BasePath, _clientStateFileName));
+        await state.SaveAsync(GetStatePath(path));
     }
 
     public static string GetClientAssetPath(MinecraftPath path, string clientAsset)
@@ -52,7 +60,7 @@ internal sealed class AxiomRuntimeManager
         if (!IsSafeAssetName(clientAsset))
             throw new InvalidOperationException("The Axiom client asset name is invalid.");
 
-        return Path.Combine(path.BasePath, "mods", clientAsset);
+        return Path.Combine(GetModsDirectory(path), clientAsset);
     }
 
     private static bool IsSafeAssetName(string value) =>
