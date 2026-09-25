@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   release:
-    runs-on: ubuntu-24.04
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -21,15 +21,30 @@ jobs:
           java-version: '21'
           cache: gradle
 
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.2.0'
 
-      - name: Build Axiom
+      - name: Build Axiom client foundation
         run: gradle --no-daemon build
 
-      - name: Prepare launcher asset
-        run: cp build/libs/axiom-0.1.0.jar build/libs/axiom.jar
+      - name: Prepare Axiom client asset
+        shell: pwsh
+        run: Copy-Item build/libs/axiom-0.1.0.jar build/libs/axiom.jar
+
+      - name: Build standalone Axiom launcher
+        working-directory: launcher/AxiomLauncher
+        run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o ../../launcher-dist
+
+      - name: Verify release assets
+        shell: pwsh
+        run: |
+          if (-not (Test-Path build/libs/axiom.jar)) { throw 'axiom.jar was not produced.' }
+          if (-not (Test-Path launcher-dist/AxiomLauncher.exe)) { throw 'AxiomLauncher.exe was not produced.' }
 
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
@@ -37,4 +52,6 @@ jobs:
           tag_name: axiom-build-${{ github.run_number }}
           name: Axiom Build ${{ github.run_number }}
           generate_release_notes: true
-          files: build/libs/axiom.jar
+          files: |
+            build/libs/axiom.jar
+            launcher-dist/AxiomLauncher.exe
