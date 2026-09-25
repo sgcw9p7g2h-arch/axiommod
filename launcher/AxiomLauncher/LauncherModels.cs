@@ -14,6 +14,10 @@ internal sealed class LauncherSettings
 {
     public LauncherProfile[] Profiles { get; set; } = Array.Empty<LauncherProfile>();
     public int SelectedProfile { get; set; }
+
+    // Legacy fields are retained so older settings files can still be migrated.
+    public string? GameDirectory { get; set; }
+    public int RamMb { get; set; }
 }
 
 internal sealed class LauncherProfile
