@@ -11,6 +11,7 @@ internal sealed class FabricGameRuntime : IAxiomGameRuntime
         AxiomGameLaunchRequest request,
         CancellationToken cancellationToken = default)
     {
+        ValidateRequest(request);
         cancellationToken.ThrowIfCancellationRequested();
 
         var path = new MinecraftPath(request.GameDirectory);
@@ -25,5 +26,29 @@ internal sealed class FabricGameRuntime : IAxiomGameRuntime
 
         cancellationToken.ThrowIfCancellationRequested();
         return await launcher.BuildProcessAsync(request.RuntimeVersion, options);
+    }
+
+    private static void ValidateRequest(AxiomGameLaunchRequest request)
+    {
+        if (request == null)
+            throw new ArgumentNullException(nameof(request));
+
+        if (string.IsNullOrWhiteSpace(request.GameDirectory))
+            throw new InvalidOperationException("The Axiom game directory is required.");
+
+        if (string.IsNullOrWhiteSpace(request.RuntimeVersion))
+            throw new InvalidOperationException("The Axiom runtime version is required.");
+
+        if (string.IsNullOrWhiteSpace(request.Username))
+            throw new InvalidOperationException("The Microsoft account username is required.");
+
+        if (string.IsNullOrWhiteSpace(request.AccessToken))
+            throw new InvalidOperationException("The Microsoft access token is required.");
+
+        if (string.IsNullOrWhiteSpace(request.Uuid))
+            throw new InvalidOperationException("The Microsoft account UUID is required.");
+
+        if (request.MaximumRamMb < 1024 || request.MaximumRamMb > 65536)
+            throw new InvalidOperationException("Axiom RAM allocation must be between 1 GB and 64 GB.");
     }
 }
