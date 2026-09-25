@@ -7,6 +7,7 @@ internal sealed record AxiomGameLaunchRequest(
     string RuntimeVersion,
     string Username,
     string AccessToken,
+    string Uuid,
     int MaximumRamMb);
 
 internal interface IAxiomGameRuntime
