@@ -1,7 +1,6 @@
 package axiom.client.schematic;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.zip.GZIPInputStream;
 
@@ -17,7 +16,15 @@ final class NbtReader {
             case END -> null; case BYTE -> in.readByte(); case SHORT -> in.readShort(); case INT -> in.readInt(); case LONG -> in.readLong();
             case FLOAT -> in.readFloat(); case DOUBLE -> in.readDouble(); case BYTE_ARRAY -> { int n=in.readInt(); if(n<0||n>64*1024*1024) throw new IOException("invalid byte array length: "+n); byte[] a=new byte[n]; in.readFully(a); yield a; }
             case STRING -> in.readUTF();
-            case LIST -> { int child=in.readUnsignedByte(); int n=in.readInt(); if(n<0||n>10_000_000) throw new IOException("invalid list length: "+n); List<Object> list=new ArrayList<>(n); for(int i=0;i<n;i++) list.add(readPayload(child)); yield new NbtList(child,list); }
+            case LIST -> {
+                int child=in.readUnsignedByte();
+                int n=in.readInt();
+                if(n<0||n>10_000_000) throw new IOException("invalid list length: "+n);
+                if(child==END && n>0) throw new IOException("invalid NBT list: END element type with non-empty list");
+                List<Object> list=new ArrayList<>(n);
+                for(int i=0;i<n;i++) list.add(readPayload(child));
+                yield new NbtList(child,list);
+            }
             case COMPOUND -> { Map<String,Object> map=new LinkedHashMap<>(); while(true){ int t=in.readUnsignedByte(); if(t==END) break; String name=in.readUTF(); map.put(name,readPayload(t)); } yield new NbtCompound(map); }
             case INT_ARRAY -> { int n=in.readInt(); if(n<0||n>16*1024*1024) throw new IOException("invalid int array length: "+n); int[] a=new int[n]; for(int i=0;i<n;i++) a[i]=in.readInt(); yield a; }
             case LONG_ARRAY -> { int n=in.readInt(); if(n<0||n>16*1024*1024) throw new IOException("invalid long array length: "+n); long[] a=new long[n]; for(int i=0;i<n;i++) a[i]=in.readLong(); yield a; }
