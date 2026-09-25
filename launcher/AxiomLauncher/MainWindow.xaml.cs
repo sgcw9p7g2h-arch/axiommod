@@ -135,6 +135,12 @@ public partial class MainWindow : Window
         }
     }
 
+    private async Task SetRuntimeStatusAsync(MinecraftPath path, ClientManifest manifest)
+    {
+        var ready = await IsRuntimeReadyAsync(path, manifest);
+        StatusText.Text = ready ? $"Axiom {manifest.ClientVersion} • Ready" : $"Axiom {manifest.ClientVersion} • Needs repair";
+    }
+
     private async void LaunchButton_Click(object sender, RoutedEventArgs e)
     {
         if (_session == null)
