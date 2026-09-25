@@ -25,7 +25,7 @@ public final class AxiomClient implements ClientModInitializer {
     public static final BuildHud HUD=new BuildHud();
     public static final FeatureManager FEATURES=new FeatureManager(FabricLoader.getInstance().getConfigDir());
     private static final KeyMapping.Category CATEGORY=KeyMapping.Category.register(Identifier.fromNamespaceAndPath(MOD_ID,"controls"));
-    private static KeyMapping menu,build,pause,origin,rotate,cancel,features;
+    private static KeyMapping menu,build,pause,origin,rotate,cancel,features,zoom;
     public static KeyMapping menuKey(){return menu;} public static KeyMapping buildKey(){return build;}
     public static KeyMapping pauseKey(){return pause;} public static KeyMapping originKey(){return origin;}
     public static KeyMapping rotateKey(){return rotate;} public static KeyMapping cancelKey(){return cancel;}
@@ -36,7 +36,7 @@ public final class AxiomClient implements ClientModInitializer {
         menu=key("open_browser",GLFW.GLFW_KEY_M); build=key("build",GLFW.GLFW_KEY_B);
         pause=key("pause",GLFW.GLFW_KEY_P); origin=key("origin",GLFW.GLFW_KEY_O);
         rotate=key("rotate",GLFW.GLFW_KEY_R); cancel=key("cancel",GLFW.GLFW_KEY_X);
-        features=key("open_features",GLFW.GLFW_KEY_F8);
+        features=key("open_features",GLFW.GLFW_KEY_F8); zoom=key("zoom",GLFW.GLFW_KEY_C);
         ClientTickEvents.END_CLIENT_TICK.register(this::tick); HudHooks.register();
     }
     private KeyMapping key(String name,int code){
@@ -44,7 +44,7 @@ public final class AxiomClient implements ClientModInitializer {
     }
     private void tick(Minecraft client){
         while(menu.consumeClick()) client.setScreen(new SchematicBrowserScreen());
-        while(features.consumeClick()) client.setScreen(new AxiomFeaturesScreen(client.screen));
+        while(features.consumeClick()) client.setScreen(new AxiomFeaturesScreen(client.screen)); while(zoom.consumeClick()) VisualFeatures.toggleZoom();
         while(origin.consumeClick()) BUILDER.selectOrigin(client);
         while(rotate.consumeClick()){if(SCHEMATICS.selected()!=null)SCHEMATICS.selected().rotateClockwise();}
         while(cancel.consumeClick()) BUILDER.stop();

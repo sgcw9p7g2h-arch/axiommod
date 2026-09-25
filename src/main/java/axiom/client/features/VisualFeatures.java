@@ -5,7 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 
 public final class VisualFeatures {
-    private VisualFeatures() {}
+    private static boolean zoomed;\n    private static double zoomFov = 30.0;\n    private VisualFeatures() {}\n    public static void toggleZoom() { zoomed = !zoomed; }\n    public static double fov(double vanillaFov) { return zoomed && AxiomClient.FEATURES.isEnabled("zoom") ? zoomFov : vanillaFov; }
 
     public static void renderCrosshair(GuiGraphics g, Minecraft client) {
         if (client.player == null || client.options.hideGui || !AxiomClient.FEATURES.isEnabled("crosshair")) return;
