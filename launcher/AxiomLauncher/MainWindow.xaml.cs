@@ -118,7 +118,9 @@ public partial class MainWindow : Window
             StatusText.Text = $"Checking Axiom {_clientManifest.ClientVersion}...";
             await EnsureLatestAxiomModAsync(path, _clientManifest);
 
-            await WriteRuntimeStateAsync(path, _clientManifest);\n\n            StatusText.Text = "Axiom installation repaired.";
+            await WriteRuntimeStateAsync(path, _clientManifest);
+
+            StatusText.Text = "Axiom installation repaired.";
         }
         catch (Exception ex)
         {
