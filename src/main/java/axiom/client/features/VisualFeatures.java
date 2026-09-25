@@ -5,7 +5,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 
 public final class VisualFeatures {
-    private static boolean zoomed;\n    private static double zoomFov = 30.0;\n    private static int brightnessTicks = 0;\n    private VisualFeatures() {}\n    public static void toggleZoom() { zoomed = !zoomed; }\n    public static double fov(double vanillaFov) { return zoomed && AxiomClient.FEATURES.isEnabled("zoom") ? zoomFov : vanillaFov; }
+    private static boolean zoomed;
+    private static double zoomFov = 30.0;
+    private static int brightnessTicks = 0;
+    private VisualFeatures() {}
+    public static void toggleZoom() { zoomed = !zoomed; }
+    public static double fov(double vanillaFov) { return zoomed && AxiomClient.FEATURES.isEnabled("zoom") ? zoomFov : vanillaFov; }
     public static void tick(Minecraft client) {
         if (AxiomClient.FEATURES.isEnabled("fullbright")) brightnessTicks = 20;
         else if (brightnessTicks > 0) brightnessTicks--;
