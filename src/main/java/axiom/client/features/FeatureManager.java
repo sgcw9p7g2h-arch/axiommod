@@ -33,6 +33,9 @@ public final class FeatureManager {
         register("potion_effects","Potion Effects","HUD",false);
         register("snaplook","Snaplook","Visual",false);
         register("freelook","Freelook","Visual",false);
+        register("client_name","Client Name","HUD",true);
+        register("discord_presence","Discord Presence","Integration",false);
+        register("spotify","Spotify Now Playing","Integration",false);
     }
     public void register(String id,String name,String category,boolean enabled){features.putIfAbsent(id,new AxiomFeature(id,name,category,enabled));}
     public Collection<AxiomFeature> all(){return features.values();}
