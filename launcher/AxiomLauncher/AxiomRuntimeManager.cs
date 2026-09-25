@@ -30,18 +30,22 @@ internal sealed class AxiomRuntimeManager
         if (!File.Exists(runtimeAssetPath))
             return false;
 
-        var fabricApiPath = Path.Combine(GetModsDirectory(path), $"fabric-api-{fabricApiVersion}.jar");
+        var fabricApiAsset = $"fabric-api-{fabricApiVersion}.jar";
+        var fabricApiPath = GetRuntimeAssetPath(path, fabricApiAsset);
         if (!File.Exists(fabricApiPath))
             return false;
 
         var digest = await ComputeSha256Async(runtimeAssetPath);
+        var fabricApiDigest = await ComputeSha256Async(fabricApiPath);
         return runtimeManifest.Matches(
             clientVersion,
             minecraftVersion,
             fabricLoaderVersion,
             fabricApiVersion,
             clientAsset,
-            digest);
+            digest,
+            fabricApiAsset,
+            fabricApiDigest);
     }
 
     public async Task SaveStateAsync(MinecraftPath path, string clientVersion, string minecraftVersion,
@@ -60,7 +64,13 @@ internal sealed class AxiomRuntimeManager
 
         await state.SaveAsync(GetStatePath(path));
 
-        var runtimeManifest = AxiomRuntimeManifest.FromRuntimeState(state);
+        var fabricApiAsset = $"fabric-api-{fabricApiVersion}.jar";
+        var fabricApiPath = GetRuntimeAssetPath(path, fabricApiAsset);
+        if (!File.Exists(fabricApiPath))
+            throw new InvalidOperationException("The Fabric API runtime asset is missing after installation.");
+
+        var fabricApiDigest = await ComputeSha256Async(fabricApiPath);
+        var runtimeManifest = AxiomRuntimeManifest.FromRuntimeState(state, fabricApiAsset, fabricApiDigest);
         await runtimeManifest.SaveAsync(GetRuntimeManifestPath(path));
     }
 
