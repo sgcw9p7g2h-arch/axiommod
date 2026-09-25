@@ -4,5 +4,6 @@
   "fabricLoaderVersion": "0.18.1",
   "fabricApiVersion": "0.141.3+1.21.11",
   "clientAsset": "axiom.jar",
-  "launcherAsset": "AxiomLauncher.exe"
+  "launcherAsset": "AxiomLauncher.exe",
+  "runtime": "fabric"
 }
