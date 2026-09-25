@@ -87,12 +87,31 @@ public final class FeatureHud {
             ItemStack held = client.player.getMainHandItem();
             String name = held.isEmpty() ? "Empty" : held.getHoverName().getString();
             g.drawString(client.font, "Held: " + name, 8, y, 0xFFFFFF);
+            y += 12;
+        }
+        if (AxiomClient.FEATURES.isEnabled("item_durability")) {
+            ItemStack held = client.player.getMainHandItem();
+            if (!held.isEmpty() && held.isDamageableItem()) {
+                int remaining = held.getMaxDamage() - held.getDamageValue();
+                g.drawString(client.font, "Durability: " + remaining + "/" + held.getMaxDamage(), 8, y, 0xFFFFFF);
+                y += 12;
+            }
+        }
+        if (AxiomClient.FEATURES.isEnabled("ping")) {
+            int ping = 0;
+            if (client.getConnection() != null && client.player != null) {
+                var info = client.getConnection().getPlayerInfo(client.player.getUUID());
+                if (info != null) ping = Math.max(0, info.getLatency());
+            }
+            g.drawString(client.font, "Ping: " + ping + "ms", 8, y, 0xFFFFFF);
+            y += 12;
         }
 
         if (AxiomClient.FEATURES.isEnabled("fps_graph")) renderFpsGraph(g, client);
         if (AxiomClient.FEATURES.isEnabled("keystrokes")) renderKeystrokes(g, client);
         if (AxiomClient.FEATURES.isEnabled("armor_hud")) renderArmor(g, client);
         if (AxiomClient.FEATURES.isEnabled("potion_effects")) renderPotionEffects(g, client);
+        if (AxiomClient.FEATURES.isEnabled("hotbar_overlay")) renderHotbarOverlay(g, client);
     }
 
     private static String formatPlaytime() {
@@ -140,6 +159,15 @@ public final class FeatureHud {
         int x = c.getWindow().getGuiScaledWidth() - 88;
         int y = c.getWindow().getGuiScaledHeight() - 24;
         for (int i = 0; i < 4; i++) g.renderItem(inv.getItem(36 + i), x + i * 20, y);
+    }
+
+    private static void renderHotbarOverlay(GuiGraphics g, Minecraft c) {
+        int x = c.getWindow().getGuiScaledWidth() / 2 - 90;
+        int y = c.getWindow().getGuiScaledHeight() - 18;
+        for (int slot = 0; slot < 9; slot++) {
+            String key = slot == 8 ? "9" : Integer.toString(slot + 1);
+            g.drawCenteredString(c.font, key, x + slot * 20 + 9, y, 0xFFFFFF);
+        }
     }
 
     private static void renderPotionEffects(GuiGraphics g, Minecraft c) {
