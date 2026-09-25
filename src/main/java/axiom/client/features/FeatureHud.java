@@ -33,7 +33,6 @@ public final class FeatureHud {
         if (right && !lastRight) rightClicks.addLast(now);
         lastLeft = left;
         lastRight = right;
-
         pruneClicks(leftClicks, now);
         pruneClicks(rightClicks, now);
 
@@ -52,43 +51,38 @@ public final class FeatureHud {
     public static void render(GuiGraphics g) {
         Minecraft client = Minecraft.getInstance();
         if (client.player == null || client.options.hideGui) return;
-
         int y = 8;
 
+        if (AxiomClient.FEATURES.isEnabled("client_name")) {
+            g.drawString(client.font, "Axiom", 8, y, 0xFFFFFF);
+            y += 12;
+        }
         if (AxiomClient.FEATURES.isEnabled("fps")) {
             g.drawString(client.font, "FPS: " + client.getFps(), 8, y, 0xFFFFFF);
             y += 12;
         }
-
         if (AxiomClient.FEATURES.isEnabled("coordinates")) {
             var p = client.player.blockPosition();
             g.drawString(client.font, "XYZ: " + p.getX() + " " + p.getY() + " " + p.getZ(), 8, y, 0xFFFFFF);
             y += 12;
         }
-
         if (AxiomClient.FEATURES.isEnabled("cps")) {
             g.drawString(client.font, "CPS: " + leftClicks.size() + " | " + rightClicks.size(), 8, y, 0xFFFFFF);
             y += 12;
         }
-
         if (AxiomClient.FEATURES.isEnabled("direction")) {
             g.drawString(client.font, "Facing: " + direction(client.player.getYRot()), 8, y, 0xFFFFFF);
             y += 12;
         }
-
         if (AxiomClient.FEATURES.isEnabled("playtime")) {
             g.drawString(client.font, "Playtime: " + formatPlaytime(), 8, y, 0xFFFFFF);
             y += 12;
         }
-
         if (AxiomClient.FEATURES.isEnabled("server_address")) {
-            String server = client.getCurrentServer() == null
-                    ? "Singleplayer"
-                    : client.getCurrentServer().ip;
+            String server = client.getCurrentServer() == null ? "Singleplayer" : client.getCurrentServer().ip;
             g.drawString(client.font, "Server: " + server, 8, y, 0xFFFFFF);
             y += 12;
         }
-
         if (AxiomClient.FEATURES.isEnabled("held_item")) {
             ItemStack held = client.player.getMainHandItem();
             String name = held.isEmpty() ? "Empty" : held.getHoverName().getString();
@@ -98,20 +92,17 @@ public final class FeatureHud {
         if (AxiomClient.FEATURES.isEnabled("fps_graph")) renderFpsGraph(g, client);
         if (AxiomClient.FEATURES.isEnabled("keystrokes")) renderKeystrokes(g, client);
         if (AxiomClient.FEATURES.isEnabled("armor_hud")) renderArmor(g, client);
+        if (AxiomClient.FEATURES.isEnabled("potion_effects")) renderPotionEffects(g, client);
     }
 
     private static String formatPlaytime() {
         long seconds = playtimeTicks / 20L;
-        long hours = seconds / 3600L;
-        long minutes = (seconds % 3600L) / 60L;
-        long remaining = seconds % 60L;
-        return String.format("%02d:%02d:%02d", hours, minutes, remaining);
+        return String.format("%02d:%02d:%02d", seconds / 3600L, (seconds % 3600L) / 60L, seconds % 60L);
     }
 
     private static void renderFpsGraph(GuiGraphics g, Minecraft c) {
         if (fpsHistory.isEmpty()) return;
-        int x = c.getWindow().getGuiScaledWidth() - 130;
-        int baseY = 78;
+        int x = c.getWindow().getGuiScaledWidth() - 130, baseY = 78;
         int max = Math.max(1, fpsHistory.stream().max(Integer::compareTo).orElse(1));
         int i = 0;
         for (int fps : fpsHistory) {
@@ -139,8 +130,7 @@ public final class FeatureHud {
         drawKey(g, c, "SP", c.options.keyJump, x, y + 44, 66);
     }
 
-    private static void drawKey(GuiGraphics g, Minecraft c, String text,
-                                net.minecraft.client.KeyMapping key, int x, int y, int w) {
+    private static void drawKey(GuiGraphics g, Minecraft c, String text, net.minecraft.client.KeyMapping key, int x, int y, int w) {
         g.fill(x, y, x + w, y + 20, key.isDown() ? 0xA0FFFFFF : 0x60303030);
         g.drawCenteredString(c.font, text, x + w / 2, y + 6, 0xFFFFFF);
     }
@@ -149,9 +139,21 @@ public final class FeatureHud {
         Inventory inv = c.player.getInventory();
         int x = c.getWindow().getGuiScaledWidth() - 88;
         int y = c.getWindow().getGuiScaledHeight() - 24;
-        for (int i = 0; i < 4; i++) {
-            ItemStack stack = inv.getItem(36 + i);
-            g.renderItem(stack, x + i * 20, y);
+        for (int i = 0; i < 4; i++) g.renderItem(inv.getItem(36 + i), x + i * 20, y);
+    }
+
+    private static void renderPotionEffects(GuiGraphics g, Minecraft c) {
+        int x = c.getWindow().getGuiScaledWidth() - 150;
+        int y = 8;
+        for (var effect : c.player.getActiveEffects()) {
+            String name = effect.getEffect().value().getDisplayName().getString();
+            int seconds = effect.getDuration() / 20;
+            g.drawString(c.font, name + " " + formatDuration(seconds), x, y, 0xFFFFFF);
+            y += 12;
         }
+    }
+
+    private static String formatDuration(int seconds) {
+        return String.format("%d:%02d", seconds / 60, seconds % 60);
     }
 }
