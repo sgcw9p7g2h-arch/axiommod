@@ -13,6 +13,8 @@ public final class FeatureHud {
     private static boolean lastLeft, lastRight;
     private static final Deque<Long> leftClicks = new ArrayDeque<>();
     private static final Deque<Long> rightClicks = new ArrayDeque<>();
+    private static final Deque<Integer> fpsHistory = new ArrayDeque<>();
+    private static int fpsSampleTicks;
 
     private FeatureHud() {}
 
@@ -28,6 +30,11 @@ public final class FeatureHud {
         lastRight = right;
         pruneClicks(leftClicks, now);
         pruneClicks(rightClicks, now);
+        if (++fpsSampleTicks >= 5) {
+            fpsHistory.addLast(client.getFps());
+            while (fpsHistory.size() > 60) fpsHistory.removeFirst();
+            fpsSampleTicks = 0;
+        }
     }
 
     private static void pruneClicks(Deque<Long> clicks, long now) {\n        long cutoff = now - 1_000_000_000L;\n        while (!clicks.isEmpty() && clicks.peekFirst() < cutoff) clicks.removeFirst();\n    }\n\n    public static void render(GuiGraphics g) {
@@ -43,8 +50,35 @@ public final class FeatureHud {
         }
         if (AxiomClient.FEATURES.isEnabled("cps"))
             g.drawString(client.font, "CPS: " + leftClicks.size() + " | " + rightClicks.size(), 8, y, 0xFFFFFF);
+        if (AxiomClient.FEATURES.isEnabled("fps_graph")) renderFpsGraph(g, client);
+        if (AxiomClient.FEATURES.isEnabled("direction")) {
+            g.drawString(client.font, "Facing: " + direction(client.player.getYRot()), 8, y + 12, 0xFFFFFF);
+        }
         if (AxiomClient.FEATURES.isEnabled("keystrokes")) renderKeystrokes(g, client);
         if (AxiomClient.FEATURES.isEnabled("armor_hud")) renderArmor(g, client);
+    }
+
+
+    private static void renderFpsGraph(GuiGraphics g, Minecraft c) {
+        if (fpsHistory.isEmpty()) return;
+        int x = c.getWindow().getGuiScaledWidth() - 130;
+        int baseY = 78;
+        int max = Math.max(1, fpsHistory.stream().max(Integer::compareTo).orElse(1));
+        int i = 0;
+        for (int fps : fpsHistory) {
+            int height = Math.max(1, Math.min(50, fps * 50 / max));
+            g.fill(x + i * 2, baseY - height, x + i * 2 + 1, baseY, 0xB0FFFFFF);
+            i++;
+        }
+        g.drawString(c.font, "FPS graph", x, baseY + 4, 0xFFFFFF);
+    }
+
+    private static String direction(float yaw) {
+        float normalized = ((yaw % 360.0f) + 360.0f) % 360.0f;
+        if (normalized >= 315 || normalized < 45) return "South";
+        if (normalized < 135) return "West";
+        if (normalized < 225) return "North";
+        return "East";
     }
 
     private static void renderKeystrokes(GuiGraphics g, Minecraft c) {
