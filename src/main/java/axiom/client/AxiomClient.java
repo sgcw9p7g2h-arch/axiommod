@@ -4,6 +4,7 @@ import axiom.client.build.*;
 import axiom.client.features.FeatureHud;
 import axiom.client.features.FeatureManager;
 import axiom.client.features.MovementFeatures;
+import axiom.client.features.VisualFeatures;
 import axiom.client.schematic.*;
 import axiom.client.ui.AxiomFeaturesScreen;
 import axiom.client.ui.SchematicBrowserScreen;
