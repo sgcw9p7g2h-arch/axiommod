@@ -1,0 +1,52 @@
+name: Axiom CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  java:
+    name: Build Java client
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - name: Build
+        run: ./gradlew build
+
+  launcher:
+    name: Build Windows launcher
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: launcher/AxiomLauncher
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restore
+        run: dotnet restore
+      - name: Build
+        run: dotnet build -c Release --no-restore
+      - name: Publish
+        run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o ../../ci-launcher-dist
+      - name: Verify launcher
+        shell: pwsh
+        run: |
+          if (-not (Test-Path ../../ci-launcher-dist/AxiomLauncher.exe)) {
+            throw "AxiomLauncher.exe was not produced."
+          }
+          if ((Get-Item ../../ci-launcher-dist/AxiomLauncher.exe).Length -le 0) {
+            throw "AxiomLauncher.exe is empty."
+          }
