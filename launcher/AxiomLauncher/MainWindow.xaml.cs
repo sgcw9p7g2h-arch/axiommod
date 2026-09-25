@@ -311,11 +311,11 @@ public partial class MainWindow : Window
             !IsValidVersion(manifest.MinecraftVersion) ||
             !IsValidVersion(manifest.FabricLoaderVersion) ||
             !IsValidVersion(manifest.FabricApiVersion) ||
-            !IsSafeAssetName(manifest.ClientAsset))
+            !IsSafeAssetName(manifest.ClientAsset) ||
+            !manifest.ClientAsset.EndsWith(".jar", StringComparison.OrdinalIgnoreCase) ||
+            !IsSafeAssetName(manifest.LauncherAsset) ||
+            !manifest.LauncherAsset.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException("The Axiom client manifest is invalid.");
-
-        if (!string.IsNullOrWhiteSpace(manifest.LauncherAsset) && !IsSafeAssetName(manifest.LauncherAsset))
-            throw new InvalidOperationException("The Axiom launcher asset name is invalid.");
 
         return manifest;
     }
@@ -336,6 +336,7 @@ public partial class MainWindow : Window
 
     private static bool IsSafeAssetName(string value) =>
         !string.IsNullOrWhiteSpace(value) &&
+        value.Length <= 128 &&
         value.IndexOfAny(new[] { '/', '\\' }) < 0 &&
         value != "." &&
         value != "..";
