@@ -576,31 +576,6 @@ public partial class MainWindow : Window
         }
     }
 
-    private sealed class ClientManifest
-    {
-        public string ClientVersion { get; set; } = "0.1.0";
-        public string MinecraftVersion { get; set; } = string.Empty;
-        public string FabricLoaderVersion { get; set; } = string.Empty;
-        public string FabricApiVersion { get; set; } = string.Empty;
-        public string ClientAsset { get; set; } = string.Empty;
-        public string LauncherAsset { get; set; } = string.Empty;
-    }
-
-    private sealed class LauncherSettings
-    {
-        public LauncherProfile[] Profiles { get; set; } = Array.Empty<LauncherProfile>();
-        public int SelectedProfile { get; set; }
-        public string? GameDirectory { get; set; }
-        public int RamMb { get; set; }
-    }
-
-    private sealed class LauncherProfile
-    {
-        public string Name { get; set; } = "Profile";
-        public string GameDirectory { get; set; } = string.Empty;
-        public int RamMb { get; set; } = 4096;
-    }
-
     private void CurseForgeButton_Click(object sender, RoutedEventArgs e)
     {
         OpenExternal("https://www.curseforge.com/minecraft/search?class=mc-mods");
