@@ -42,5 +42,6 @@ The release workflow builds both components and publishes the launcher executabl
 ## Repository structure
 
 - `launcher/AxiomLauncher/` — standalone Windows launcher.
+- `client/axiom-client.json` — release manifest that keeps the launcher and client runtime versions in sync.
 - `src/main/java/` — current Java/Fabric technical foundation.
 - `.github/workflows/` — client, launcher, verification, and release automation.
