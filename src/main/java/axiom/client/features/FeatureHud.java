@@ -62,6 +62,9 @@ public final class FeatureHud {
     private static void renderArmor(GuiGraphics g, Minecraft c) {
         Inventory inv=c.player.getInventory();
         int x=c.getWindow().getGuiScaledWidth()-88, y=c.getWindow().getGuiScaledHeight()-24;
-        for(int i=0;i<4;i++){ ItemStack stack=inv.armor.get(i); g.renderItem(stack,x+i*20,y); }
+        for(int i=0;i<4;i++){
+            ItemStack stack=inv.getItem(36+i);
+            g.renderItem(stack,x+i*20,y);
+        }
     }
 }
