@@ -37,6 +37,17 @@ internal sealed class AxiomRuntimeManager
 
         var digest = await ComputeSha256Async(runtimeAssetPath);
         var fabricApiDigest = await ComputeSha256Async(fabricApiPath);
+        var stagedClientPath = GetClientAssetPath(path, clientAsset);
+        var stagedFabricApiPath = GetClientAssetPath(path, fabricApiAsset);
+        if (!File.Exists(stagedClientPath) || !File.Exists(stagedFabricApiPath))
+            return false;
+
+        var stagedClientDigest = await ComputeSha256Async(stagedClientPath);
+        var stagedFabricApiDigest = await ComputeSha256Async(stagedFabricApiPath);
+        if (!string.Equals(stagedClientDigest, digest, StringComparison.OrdinalIgnoreCase) ||
+            !string.Equals(stagedFabricApiDigest, fabricApiDigest, StringComparison.OrdinalIgnoreCase))
+            return false;
+
         return runtimeManifest.Matches(
             clientVersion,
             minecraftVersion,
