@@ -223,16 +223,14 @@ public partial class MainWindow : Window
 
     private async Task EnsureFabricApiAsync(MinecraftPath path, ClientManifest manifest)
     {
-        var modsDirectory = Path.Combine(path.BasePath, "mods");
-        Directory.CreateDirectory(modsDirectory);
         var fileName = $"fabric-api-{manifest.FabricApiVersion}.jar";
-        var destination = Path.Combine(modsDirectory, fileName);
+        var destination = AxiomRuntimeManager.GetRuntimeAssetPath(path, fileName);
         var url = $"https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/{manifest.FabricApiVersion}/{fileName}";
 
-        if (File.Exists(destination))
-            return;
+        if (!File.Exists(destination))
+            await DownloadFileAsync(url, destination);
 
-        await DownloadFileAsync(url, destination);
+        AxiomRuntimeManager.StageClientAsset(path, fileName);
     }
 
     private async Task EnsureLatestAxiomModAsync(MinecraftPath path, ClientManifest manifest)
