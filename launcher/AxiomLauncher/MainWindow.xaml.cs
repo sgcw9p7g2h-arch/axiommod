@@ -306,10 +306,11 @@ public partial class MainWindow : Window
         }
 
         var manifest = JsonSerializer.Deserialize<ClientManifest>(manifestJson);
-        if (manifest == null || string.IsNullOrWhiteSpace(manifest.ClientVersion) ||
-            string.IsNullOrWhiteSpace(manifest.MinecraftVersion) ||
-            string.IsNullOrWhiteSpace(manifest.FabricLoaderVersion) ||
-            string.IsNullOrWhiteSpace(manifest.FabricApiVersion) ||
+        if (manifest == null ||
+            !IsValidVersion(manifest.ClientVersion) ||
+            !IsValidVersion(manifest.MinecraftVersion) ||
+            !IsValidVersion(manifest.FabricLoaderVersion) ||
+            !IsValidVersion(manifest.FabricApiVersion) ||
             !IsSafeAssetName(manifest.ClientAsset))
             throw new InvalidOperationException("The Axiom client manifest is invalid.");
 
@@ -317,6 +318,20 @@ public partial class MainWindow : Window
             throw new InvalidOperationException("The Axiom launcher asset name is invalid.");
 
         return manifest;
+    }
+
+    private static bool IsValidVersion(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value) || value.Length > 64)
+            return false;
+
+        foreach (var character in value)
+        {
+            if (!(char.IsLetterOrDigit(character) || character is '.' or '-' or '_' or '+'))
+                return false;
+        }
+
+        return true;
     }
 
     private static bool IsSafeAssetName(string value) =>
