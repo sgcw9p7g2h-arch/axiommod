@@ -43,14 +43,23 @@ jobs:
       - name: Verify release assets
         shell: pwsh
         run: |
-          if (-not (Test-Path build/libs/axiom.jar)) { throw 'axiom.jar was not produced.' }
-          if (-not (Test-Path launcher-dist/AxiomLauncher.exe)) { throw 'AxiomLauncher.exe was not produced.' }
-          if (-not (Test-Path client/axiom-client.json)) { throw 'client/axiom-client.json was not produced.' }
-          $manifest = Get-Content client/axiom-client.json -Raw | ConvertFrom-Json
-          if ($manifest.clientAsset -ne 'axiom.jar') { throw "Manifest clientAsset must be axiom.jar, got '$($manifest.clientAsset)'." }
-          if ($manifest.launcherAsset -ne 'AxiomLauncher.exe') { throw "Manifest launcherAsset must be AxiomLauncher.exe, got '$($manifest.launcherAsset)'." }
-          if ([string]::IsNullOrWhiteSpace($manifest.clientVersion)) { throw 'Manifest clientVersion is missing.' }
-          if ([string]::IsNullOrWhiteSpace($manifest.minecraftVersion)) { throw 'Manifest minecraftVersion is missing.' }
+@@
+           if (-not (Test-Path build/libs/axiom.jar)) { throw 'axiom.jar was not produced.' }
+           if (-not (Test-Path launcher-dist/AxiomLauncher.exe)) { throw 'AxiomLauncher.exe was not produced.' }
+           if (-not (Test-Path client/axiom-client.json)) { throw 'client/axiom-client.json was not produced.' }
++          if ((Get-Item build/libs/axiom.jar).Length -le 0) { throw 'axiom.jar is empty.' }
++          if ((Get-Item launcher-dist/AxiomLauncher.exe).Length -le 0) { throw 'AxiomLauncher.exe is empty.' }
+           $manifest = Get-Content client/axiom-client.json -Raw | ConvertFrom-Json
+           if ($manifest.clientAsset -ne 'axiom.jar') { throw "Manifest clientAsset must be axiom.jar, got '$($manifest.clientAsset)'." }
+           if ($manifest.launcherAsset -ne 'AxiomLauncher.exe') { throw "Manifest launcherAsset must be AxiomLauncher.exe, got '$($manifest.launcherAsset)'." }
+-          if ([string]::IsNullOrWhiteSpace($manifest.clientVersion)) { throw 'Manifest clientVersion is missing.' }
+-          if ([string]::IsNullOrWhiteSpace($manifest.minecraftVersion)) { throw 'Manifest minecraftVersion is missing.' }
++          foreach ($field in @('clientVersion', 'minecraftVersion', 'fabricLoaderVersion', 'fabricApiVersion', 'clientAsset', 'launcherAsset')) {
++            if ([string]::IsNullOrWhiteSpace($manifest.$field)) { throw "Manifest $field is missing." }
++          }
++          if ($manifest.clientAsset -match '[\\/]') { throw 'Manifest clientAsset contains a path separator.' }
++          if ($manifest.launcherAsset -match '[\\/]') { throw 'Manifest launcherAsset contains a path separator.' }
++          if ($manifest.clientAsset -in @('.', '..') -or $manifest.launcherAsset -in @('.', '..')) { throw 'Manifest asset name is invalid.' }
 
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
