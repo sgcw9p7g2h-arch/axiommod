@@ -30,8 +30,7 @@ internal sealed class FabricGameRuntime : IAxiomGameRuntime
 
     private static void ValidateRequest(AxiomGameLaunchRequest request)
     {
-        if (request == null)
-            throw new ArgumentNullException(nameof(request));
+        ArgumentNullException.ThrowIfNull(request);
 
         if (string.IsNullOrWhiteSpace(request.GameDirectory))
             throw new InvalidOperationException("The Axiom game directory is required.");
