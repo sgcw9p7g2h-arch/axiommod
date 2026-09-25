@@ -127,12 +127,13 @@ internal sealed class AxiomRuntimeManager
         try
         {
             File.Copy(runtimeAsset, temporary, true);
-            File.Move(temporary, destination, true);
 
             var sourceDigest = await ComputeSha256Async(runtimeAsset);
-            var stagedDigest = await ComputeSha256Async(destination);
+            var stagedDigest = await ComputeSha256Async(temporary);
             if (!string.Equals(sourceDigest, stagedDigest, StringComparison.OrdinalIgnoreCase))
                 throw new IOException("The staged Axiom runtime asset failed its integrity check.");
+
+            File.Move(temporary, destination, true);
         }
         catch
         {
