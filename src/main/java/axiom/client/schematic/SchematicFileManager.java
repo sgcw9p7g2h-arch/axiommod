@@ -12,6 +12,8 @@ import java.util.List;
 /** Loads Axiom and Litematica schematics from the game directory. */
 public final class SchematicFileManager {
     private final Path dir = FabricLoader.getInstance().getGameDir().resolve("axiom/schematics");
+    private static final int MAX_SCHEMATIC_FILES = 128;
+    private static final long MAX_AXSCHEM_BYTES = 16 * 1024 * 1024L;
     private final List<SchematicEngine> loaded = new ArrayList<>();
     private SchematicEngine selected;
 
@@ -23,6 +25,7 @@ public final class SchematicFileManager {
             try (var stream = Files.list(dir)) {
                 stream.filter(p -> { String n=p.getFileName().toString().toLowerCase(java.util.Locale.ROOT); return n.endsWith(".axschem") || n.endsWith(".litematic"); })
                         .sorted(java.util.Comparator.comparing(p -> p.getFileName().toString().toLowerCase(java.util.Locale.ROOT)))
+                        .limit(MAX_SCHEMATIC_FILES)
                         .forEach(path -> {
                             try {
                                 loaded.add(loadAny(path));
@@ -51,6 +54,7 @@ public final class SchematicFileManager {
     }
 
     private SchematicEngine load(Path path) throws IOException {
+        if (Files.size(path) > MAX_AXSCHEM_BYTES) throw new IOException("AXSCHEM file is larger than 16 MB");
         List<String> lines = Files.readAllLines(path);
         if (lines.isEmpty() || !"AXSCHEM 1".equals(lines.get(0).trim())) {
             throw new IOException("Bad AXSCHEM header");
