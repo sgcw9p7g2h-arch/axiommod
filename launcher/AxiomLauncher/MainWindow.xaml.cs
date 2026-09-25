@@ -80,6 +80,59 @@ public partial class MainWindow : Window
         }
     }
 
+    private async void RepairButton_Click(object sender, RoutedEventArgs e)
+    {
+        RepairButton.IsEnabled = false;
+        LaunchButton.IsEnabled = false;
+        LoginButton.IsEnabled = false;
+        StatusText.Text = "Checking Axiom installation...";
+
+        try
+        {
+            SaveCurrentProfile();
+            var gameDirectory = GameDirBox.Text.Trim();
+            if (string.IsNullOrWhiteSpace(gameDirectory))
+                throw new InvalidOperationException("Choose a Minecraft game directory before repairing.");
+
+            Directory.CreateDirectory(gameDirectory);
+            SaveSettings();
+
+            var path = new MinecraftPath(gameDirectory);
+            _launcher = new MinecraftLauncher(path);
+            _clientManifest = await LoadClientManifestAsync();
+
+            VersionBox.Items.Clear();
+            VersionBox.Items.Add(_clientManifest.MinecraftVersion);
+            VersionBox.SelectedIndex = 0;
+
+            StatusText.Text = $"Repairing Axiom {_clientManifest.ClientVersion}...";
+            await _launcher.InstallAsync(_clientManifest.MinecraftVersion);
+
+            StatusText.Text = $"Installing Fabric Loader {_clientManifest.FabricLoaderVersion}...";
+            var fabricInstaller = new FabricInstaller(_httpClient);
+            await fabricInstaller.Install(_clientManifest.MinecraftVersion, _clientManifest.FabricLoaderVersion, path);
+
+            StatusText.Text = "Checking Fabric API...";
+            await EnsureFabricApiAsync(path, _clientManifest);
+
+            StatusText.Text = $"Checking Axiom {_clientManifest.ClientVersion}...";
+            await EnsureLatestAxiomModAsync(path, _clientManifest);
+
+            StatusText.Text = "Axiom installation repaired.";
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = "Repair failed.";
+            System.Windows.MessageBox.Show(ex.Message, "Axiom Repair", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            RepairButton.IsEnabled = true;
+            LaunchButton.IsEnabled = true;
+            LoginButton.IsEnabled = true;
+        }
+    }
+
     private async void LaunchButton_Click(object sender, RoutedEventArgs e)
     {
         if (_session == null)
