@@ -27,15 +27,15 @@ internal sealed class AxiomRuntimeManager
         if (state == null)
             return false;
 
-        var assetPath = GetClientAssetPath(path, clientAsset);
-        if (!File.Exists(assetPath))
+        var runtimeAssetPath = GetRuntimeAssetPath(path, clientAsset);
+        if (!File.Exists(runtimeAssetPath))
             return false;
 
         var fabricApiPath = Path.Combine(GetModsDirectory(path), $"fabric-api-{fabricApiVersion}.jar");
         if (!File.Exists(fabricApiPath))
             return false;
 
-        var digest = await ComputeSha256Async(assetPath);
+        var digest = await ComputeSha256Async(runtimeAssetPath);
         return state.Matches(clientVersion, minecraftVersion, fabricLoaderVersion, fabricApiVersion, clientAsset, digest);
     }
 
@@ -45,9 +45,9 @@ internal sealed class AxiomRuntimeManager
         if (!IsSafeAssetName(clientAsset))
             throw new InvalidOperationException("The Axiom client asset name is invalid.");
 
-        var assetPath = GetClientAssetPath(path, clientAsset);
+        var assetPath = GetRuntimeAssetPath(path, clientAsset);
         if (!File.Exists(assetPath))
-            throw new InvalidOperationException("The Axiom client asset is missing after installation.");
+            throw new InvalidOperationException("The Axiom runtime asset is missing after installation.");
 
         var digest = await ComputeSha256Async(assetPath);
         var state = ClientRuntimeState.FromManifest(
