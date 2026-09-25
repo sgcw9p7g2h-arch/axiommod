@@ -7,6 +7,7 @@ internal sealed class ClientManifest
     public string FabricLoaderVersion { get; set; } = string.Empty;
     public string FabricApiVersion { get; set; } = string.Empty;
     public string ClientAsset { get; set; } = string.Empty;
+    public string Runtime { get; set; } = "fabric";
     public string LauncherAsset { get; set; } = string.Empty;
 }
 
