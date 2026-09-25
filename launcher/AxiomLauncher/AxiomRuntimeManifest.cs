@@ -53,18 +53,26 @@ internal sealed class AxiomRuntimeManifest
 
     private bool IsValid() =>
         SchemaVersion == 2 &&
+        HasValue(ClientVersion) &&
+        HasValue(MinecraftVersion) &&
+        HasValue(FabricLoaderVersion) &&
+        HasValue(FabricApiVersion) &&
         IsSafeAssetName(ClientAsset) &&
         ClientAsset.EndsWith(".jar", StringComparison.OrdinalIgnoreCase) &&
         IsSafeAssetName(FabricApiAsset) &&
         FabricApiAsset.EndsWith(".jar", StringComparison.OrdinalIgnoreCase) &&
         IsSha256(ClientAssetSha256) &&
         IsSha256(FabricApiAssetSha256) &&
-        InstalledAtUtc != default;
+        InstalledAtUtc != default &&
+        InstalledAtUtc.Kind == DateTimeKind.Utc;
+
+    private static bool HasValue(string value) =>
+        !string.IsNullOrWhiteSpace(value) && value.Length <= 128;
 
     private static bool IsSafeAssetName(string value) =>
         !string.IsNullOrWhiteSpace(value) &&
         value.Length <= 128 &&
-        value.IndexOfAny(new[] { '/', '\\' }) < 0 &&
+        value.IndexOfAny(new[] { '/', '\' }) < 0 &&
         value != "." &&
         value != "..";
 
@@ -97,12 +105,35 @@ internal sealed class AxiomRuntimeManifest
             Directory.CreateDirectory(directory);
 
         var temporary = path + ".tmp";
-        await using (var stream = File.Create(temporary))
+        try
         {
-            await JsonSerializer.SerializeAsync(stream, this, new JsonSerializerOptions { WriteIndented = true });
-            await stream.FlushAsync();
-        }
+            await using (var stream = new FileStream(
+                temporary,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None,
+                81920,
+                FileOptions.SequentialScan))
+            {
+                await JsonSerializer.SerializeAsync(
+                    stream,
+                    this,
+                    new JsonSerializerOptions { WriteIndented = true });
+                await stream.FlushAsync();
+            }
 
-        File.Move(temporary, path, true);
+            File.Move(temporary, path, true);
+        }
+        catch
+        {
+            try
+            {
+                if (File.Exists(temporary))
+                    File.Delete(temporary);
+            }
+            catch { }
+
+            throw;
+        }
     }
 }
