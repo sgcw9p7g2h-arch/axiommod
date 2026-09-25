@@ -34,7 +34,7 @@ public final class OnlineSchematicService {
     public Path download(Result r) throws IOException,InterruptedException {
         Files.createDirectories(dir); String safe=r.name().replaceAll("[^A-Za-z0-9._-]","_"); if(!safe.toLowerCase(Locale.ROOT).endsWith(".litematic"))safe+=".litematic";
         Path out=dir.resolve(safe).normalize(); if(!out.startsWith(dir.normalize()))throw new IOException("Invalid filename");
-        String url="https://raw.githubusercontent.com/"+r.repo()+"/"+r.branch()+"/"+r.path().replace(" ","%20");
+        String url="https://raw.githubusercontent.com/"+encodePath(r.repo())+"/"+encodePath(r.branch())+"/"+encodePath(r.path());
         HttpRequest req=HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(20)).header("User-Agent","Axiom-Minecraft-Mod").GET().build();
         HttpResponse<byte[]> res=http.send(req,HttpResponse.BodyHandlers.ofByteArray()); if(res.statusCode()!=200)throw new IOException("Download failed: HTTP "+res.statusCode());
         if(res.body().length>MAX_DOWNLOAD_BYTES)throw new IOException("Schematic is larger than 32 MB"); Path tmp=out.resolveSibling(out.getFileName()+".download");
@@ -44,6 +44,15 @@ public final class OnlineSchematicService {
         return out;
     }
     public SchematicEngine importDownloaded(Path path) throws IOException{return new LitematicImporter().load(path);}
+    private static String encodePath(String path) {
+        StringBuilder out = new StringBuilder(path.length() + 16);
+        for (String segment : path.split("/", -1)) {
+            if (out.length() > 0) out.append('/');
+            out.append(URLEncoder.encode(segment, java.nio.charset.StandardCharsets.UTF_8).replace("+", "%20"));
+        }
+        return out.toString();
+    }
+
     private String get(String url) throws IOException,InterruptedException {
         HttpRequest r=HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(10)).header("Accept","application/vnd.github+json").header("User-Agent","Axiom-Minecraft-Mod").GET().build();
         HttpResponse<String> x=http.send(r,HttpResponse.BodyHandlers.ofString());
