@@ -1,14 +1,17 @@
 using System.Diagnostics;
-using CmlLib.Core;
-using CmlLib.Core.Auth;
 
 namespace AxiomLauncher;
+
+internal sealed record AxiomGameLaunchRequest(
+    string GameDirectory,
+    string RuntimeVersion,
+    string Username,
+    string AccessToken,
+    int MaximumRamMb);
 
 internal interface IAxiomGameRuntime
 {
     Task<Process> LaunchAsync(
-        MinecraftLauncher launcher,
-        string runtimeVersion,
-        MSession session,
-        int maximumRamMb);
+        AxiomGameLaunchRequest request,
+        CancellationToken cancellationToken = default);
 }
