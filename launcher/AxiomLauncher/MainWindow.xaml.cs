@@ -295,6 +295,30 @@ public partial class MainWindow : Window
         await state.SaveAsync(Path.Combine(path.BasePath, ".axiom", "client-state.json"));
     }
 
+    private async Task<bool> IsRuntimeReadyAsync(MinecraftPath path, ClientManifest manifest)
+    {
+        if (!IsSafeAssetName(manifest.ClientAsset))
+            return false;
+
+        var statePath = Path.Combine(path.BasePath, ".axiom", "client-state.json");
+        var state = await ClientRuntimeState.LoadAsync(statePath);
+        if (state == null)
+            return false;
+
+        var assetPath = Path.Combine(path.BasePath, "mods", manifest.ClientAsset);
+        if (!File.Exists(assetPath))
+            return false;
+
+        var digest = await ComputeSha256Async(assetPath);
+        return state.Matches(
+            manifest.ClientVersion,
+            manifest.MinecraftVersion,
+            manifest.FabricLoaderVersion,
+            manifest.FabricApiVersion,
+            manifest.ClientAsset,
+            digest);
+    }
+
     private async Task<ClientManifest> LoadClientManifestAsync()
     {
         var releaseJson = await _httpClient.GetStringAsync(LatestReleaseApi);
