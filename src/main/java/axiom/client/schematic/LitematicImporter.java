@@ -30,10 +30,11 @@ public final class LitematicImporter {
             if(size!=null){sx=size.intValue("x",sx);sy=size.intValue("y",sy);sz=size.intValue("z",sz);}
             NbtReader.NbtCompound pos=region.compound("Position");
             int px=pos==null?0:pos.intValue("x",0), py=pos==null?0:pos.intValue("y",0), pz=pos==null?0:pos.intValue("z",0);
-            int ax=Math.abs(sx), ay=Math.abs(sy), az=Math.abs(sz);
+
+            long ax=Math.abs((long)sx), ay=Math.abs((long)sy), az=Math.abs((long)sz);
             if(ax==0||ay==0||az==0) continue;
 
-            long totalLong=(long)ax*ay*az;
+            long totalLong=ax*ay*az;
             if(totalLong>MAX_TOTAL_BLOCKS) throw new IOException("Schematic region is too large: "+totalLong+" blocks");
             if(loadedBlocks>MAX_TOTAL_BLOCKS-totalLong) throw new IOException("Schematic contains more than 10,000,000 blocks");
 
@@ -61,7 +62,7 @@ public final class LitematicImporter {
                 if(paletteIndex<0||paletteIndex>=paletteStates.size()) continue;
                 String state=paletteStates.get(paletteIndex);
                 if(state.startsWith("minecraft:air")) continue;
-                int x=index%ax, yz=index/ax, z=yz%az, y=yz/az;
+                int x=index%(int)ax, yz=index/(int)ax, z=yz%(int)az, y=yz/(int)az;
                 if(sx<0)x=-x-1; if(sy<0)y=-y-1; if(sz<0)z=-z-1;
                 blocks.add(new SchematicBlock(px+x,py+y,pz+z,state));
             }
