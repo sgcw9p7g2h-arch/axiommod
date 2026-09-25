@@ -1,6 +1,7 @@
 package axiom.client;
 
 import axiom.client.build.*;
+import axiom.client.features.FeatureHud;
 import axiom.client.features.FeatureManager;
 import axiom.client.schematic.*;
 import axiom.client.ui.AxiomFeaturesScreen;
@@ -38,27 +39,41 @@ public final class AxiomClient implements ClientModInitializer {
         FEATURES.load();
         SCHEMATICS.loadAll();
         SchematicPreview.register();
-        menu = key("open_browser", GLFW.GLFW_KEY_M); build = key("build", GLFW.GLFW_KEY_B);
-        pause = key("pause", GLFW.GLFW_KEY_P); origin = key("origin", GLFW.GLFW_KEY_O);
-        rotate = key("rotate", GLFW.GLFW_KEY_R); cancel = key("cancel", GLFW.GLFW_KEY_X);
+        menu = key("open_browser", GLFW.GLFW_KEY_M);
+        build = key("build", GLFW.GLFW_KEY_B);
+        pause = key("pause", GLFW.GLFW_KEY_P);
+        origin = key("origin", GLFW.GLFW_KEY_O);
+        rotate = key("rotate", GLFW.GLFW_KEY_R);
+        cancel = key("cancel", GLFW.GLFW_KEY_X);
         features = key("open_features", GLFW.GLFW_KEY_F8);
         ClientTickEvents.END_CLIENT_TICK.register(client -> tick(client));
         HudHooks.register();
     }
+
     private KeyMapping key(String name, int code) {
-        return KeyBindingHelper.registerKeyBinding(new KeyMapping("key.axiom."+name, InputConstants.Type.KEYSYM, code, CATEGORY));
+        return KeyBindingHelper.registerKeyBinding(new KeyMapping("key.axiom." + name, InputConstants.Type.KEYSYM, code, CATEGORY));
     }
+
     private void tick(Minecraft client) {
-        while(menu.consumeClick()) client.setScreen(new SchematicBrowserScreen());
-        while(features.consumeClick()) client.setScreen(new AxiomFeaturesScreen(client.screen));
-        while(origin.consumeClick()) BUILDER.selectOrigin(client);
-        while(rotate.consumeClick()) { if (SCHEMATICS.selected()!=null) SCHEMATICS.selected().rotateClockwise(); }
-        while(cancel.consumeClick()) BUILDER.stop();
-        while(pause.consumeClick()) { if (BUILDER.isPaused()) BUILDER.resume(client); else BUILDER.pause(); }
-        while(build.consumeClick()) {
-            if (BUILDER.isRunning()) { if (BUILDER.isPaused()) BUILDER.resume(client); else BUILDER.pause(); }
-            else BUILDER.start(client, SCHEMATICS.selected());
+        while (menu.consumeClick()) client.setScreen(new SchematicBrowserScreen());
+        while (features.consumeClick()) client.setScreen(new AxiomFeaturesScreen(client.screen));
+        while (origin.consumeClick()) BUILDER.selectOrigin(client);
+        while (rotate.consumeClick()) {
+            if (SCHEMATICS.selected() != null) SCHEMATICS.selected().rotateClockwise();
         }
-        BUILDER.tick(client); HUD.tick(BUILDER);
+        while (cancel.consumeClick()) BUILDER.stop();
+        while (pause.consumeClick()) {
+            if (BUILDER.isPaused()) BUILDER.resume(client); else BUILDER.pause();
+        }
+        while (build.consumeClick()) {
+            if (BUILDER.isRunning()) {
+                if (BUILDER.isPaused()) BUILDER.resume(client); else BUILDER.pause();
+            } else {
+                BUILDER.start(client, SCHEMATICS.selected());
+            }
+        }
+        FeatureHud.tick(client);
+        BUILDER.tick(client);
+        HUD.tick(BUILDER);
     }
 }
