@@ -10,7 +10,6 @@ using CmlLib.Core;
 using CmlLib.Core.Auth;
 using CmlLib.Core.Auth.Microsoft;
 using CmlLib.Core.ModLoaders.FabricMC;
-using CmlLib.Core.ProcessBuilder;
 
 namespace AxiomLauncher;
 
@@ -202,12 +201,18 @@ public partial class MainWindow : Window
                 StatusText.Text = $"Axiom {_clientManifest.ClientVersion} runtime is ready.";
             }
 
+            if (!string.Equals(fabricVersionName, $"fabric-loader-{_clientManifest.FabricLoaderVersion}-{_clientManifest.MinecraftVersion}", StringComparison.Ordinal))
+                throw new InvalidOperationException($"Fabric returned an unexpected runtime version: {fabricVersionName}.");
+
             StatusText.Text = "Starting Axiom...";
-            var options = new MLaunchOption { Session = _session, MaximumRamMb = GetSelectedRamMb() };
-            var process = await _launcher.BuildProcessAsync(fabricVersionName, options);
+            var process = await _gameRuntime.LaunchAsync(
+                _launcher,
+                fabricVersionName,
+                _session,
+                GetSelectedRamMb());
             process.Start();
 
-            StatusText.Text = "Axiom started.";
+            StatusText.Text = "Axiom started."
             Close();
         }
         catch (Exception ex)
