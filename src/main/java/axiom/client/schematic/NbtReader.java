@@ -18,6 +18,7 @@ final class NbtReader {
             case STRING -> in.readUTF();
             case LIST -> {
                 int child=in.readUnsignedByte();
+                if(child>LONG_ARRAY) throw new IOException("unknown NBT list element type "+child);
                 int n=in.readInt();
                 if(n<0||n>10_000_000) throw new IOException("invalid list length: "+n);
                 if(child==END && n>0) throw new IOException("invalid NBT list: END element type with non-empty list");
