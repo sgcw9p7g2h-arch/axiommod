@@ -6,6 +6,7 @@ namespace AxiomLauncher;
 internal sealed class AxiomRuntimeManager
 {
     private const string StateDirectoryName = ".axiom";
+    private const string RuntimeDirectoryName = "runtime";
     private const string StateFileName = "client-state.json";
     private const string ModsDirectoryName = "mods";
 
@@ -63,11 +64,11 @@ internal sealed class AxiomRuntimeManager
         return Path.Combine(GetModsDirectory(path), clientAsset);
     }
 
-    public static string GetRuntimeStatePath(MinecraftPath path) =>
-        GetStatePath(path);
-
     public static string GetRuntimeDirectory(MinecraftPath path) =>
-        Path.Combine(path.BasePath, StateDirectoryName);
+        Path.Combine(path.BasePath, StateDirectoryName, RuntimeDirectoryName);
+
+    public static string GetRuntimeStatePath(MinecraftPath path) =>
+        Path.Combine(path.BasePath, StateDirectoryName, StateFileName);
 
     private static bool IsSafeAssetName(string value) =>
         !string.IsNullOrWhiteSpace(value) &&
