@@ -90,6 +90,28 @@ internal sealed class AxiomRuntimeManager
         return Path.Combine(GetModsDirectory(path), clientAsset);
     }
 
+    public static string GetRuntimeAssetPath(MinecraftPath path, string clientAsset)
+    {
+        if (!IsSafeAssetName(clientAsset))
+            throw new InvalidOperationException("The Axiom client asset name is invalid.");
+
+        return Path.Combine(GetRuntimeDirectory(path), clientAsset);
+    }
+
+    public static void StageClientAsset(MinecraftPath path, string clientAsset)
+    {
+        var runtimeAsset = GetRuntimeAssetPath(path, clientAsset);
+        if (!File.Exists(runtimeAsset))
+            throw new FileNotFoundException("The Axiom runtime asset is missing.", runtimeAsset);
+
+        var modsDirectory = GetModsDirectory(path);
+        Directory.CreateDirectory(modsDirectory);
+        var destination = GetClientAssetPath(path, clientAsset);
+        var temporary = destination + ".stage";
+        File.Copy(runtimeAsset, temporary, true);
+        File.Move(temporary, destination, true);
+    }
+
     public static string GetRuntimeDirectory(MinecraftPath path) =>
         Path.Combine(path.BasePath, StateDirectoryName, RuntimeDirectoryName);
 
