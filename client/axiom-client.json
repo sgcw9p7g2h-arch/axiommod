@@ -1,0 +1,8 @@
+{
+  "clientVersion": "0.1.0",
+  "minecraftVersion": "1.21.11",
+  "fabricLoaderVersion": "0.18.1",
+  "fabricApiVersion": "0.141.3+1.21.11",
+  "clientAsset": "axiom.jar",
+  "launcherAsset": "AxiomLauncher.exe"
+}
