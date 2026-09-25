@@ -59,10 +59,6 @@ internal sealed class AxiomRuntimeManager
             throw new InvalidOperationException("The Axiom runtime asset is missing after installation.");
 
         var digest = await ComputeSha256Async(assetPath);
-        var state = ClientRuntimeState.FromManifest(
-            clientVersion, minecraftVersion, fabricLoaderVersion, fabricApiVersion, clientAsset, digest);
-
-        await state.SaveAsync(GetStatePath(path));
 
         var fabricApiAsset = $"fabric-api-{fabricApiVersion}.jar";
         var fabricApiPath = GetRuntimeAssetPath(path, fabricApiAsset);
@@ -70,6 +66,11 @@ internal sealed class AxiomRuntimeManager
             throw new InvalidOperationException("The Fabric API runtime asset is missing after installation.");
 
         var fabricApiDigest = await ComputeSha256Async(fabricApiPath);
+        var state = ClientRuntimeState.FromManifest(
+            clientVersion, minecraftVersion, fabricLoaderVersion, fabricApiVersion, clientAsset, digest);
+
+        await state.SaveAsync(GetStatePath(path));
+
         var runtimeManifest = AxiomRuntimeManifest.FromRuntimeState(state, fabricApiAsset, fabricApiDigest);
         await runtimeManifest.SaveAsync(GetRuntimeManifestPath(path));
     }
@@ -122,20 +123,6 @@ internal sealed class AxiomRuntimeManager
         var modsDirectory = GetModsDirectory(path);
         Directory.CreateDirectory(modsDirectory);
         var destination = GetClientAssetPath(path, runtimeAssetName);
-        var temporary = destination + ".stage";
-        File.Copy(runtimeAsset, temporary, true);
-        File.Move(temporary, destination, true);
-    }
-
-    public static void StageClientAsset(MinecraftPath path, string clientAsset)
-    {
-        var runtimeAsset = GetRuntimeAssetPath(path, clientAsset);
-        if (!File.Exists(runtimeAsset))
-            throw new FileNotFoundException("The Axiom runtime asset is missing.", runtimeAsset);
-
-        var modsDirectory = GetModsDirectory(path);
-        Directory.CreateDirectory(modsDirectory);
-        var destination = GetClientAssetPath(path, clientAsset);
         var temporary = destination + ".stage";
         File.Copy(runtimeAsset, temporary, true);
         File.Move(temporary, destination, true);
