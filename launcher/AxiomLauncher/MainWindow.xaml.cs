@@ -16,11 +16,9 @@ namespace AxiomLauncher;
 
 public partial class MainWindow : Window
 {
-    private const string MinecraftVersion = "1.21.11";
-    private const string FabricLoaderVersion = "0.18.1";
-    private const string FabricApiVersion = "0.141.3+1.21.11";
-    private const string AxiomAssetName = "axiom.jar";
     private const string LatestReleaseApi = "https://api.github.com/repos/sgcw9p7g2h-arch/axiommod/releases/latest";
+    private const string ClientManifestAssetName = "axiom-client.json";
+    private ClientManifest? _clientManifest;
 
     private MinecraftLauncher? _launcher;
     private MSession? _session;
@@ -115,18 +113,19 @@ public partial class MainWindow : Window
                 });
             };
 
-            StatusText.Text = $"Installing Minecraft {MinecraftVersion}...";
-            await _launcher.InstallAsync(MinecraftVersion);
+            _clientManifest = await LoadClientManifestAsync();
+            StatusText.Text = $"Installing Minecraft {_clientManifest.MinecraftVersion}...";
+            await _launcher.InstallAsync(_clientManifest.MinecraftVersion);
 
-            StatusText.Text = $"Installing Fabric Loader {FabricLoaderVersion}...";
+            StatusText.Text = $"Installing Fabric Loader {_clientManifest.FabricLoaderVersion}...";
             var fabricInstaller = new FabricInstaller(_httpClient);
-            var fabricVersionName = await fabricInstaller.Install(MinecraftVersion, FabricLoaderVersion, path);
+            var fabricVersionName = await fabricInstaller.Install(_clientManifest.MinecraftVersion, _clientManifest.FabricLoaderVersion, path);
 
             StatusText.Text = "Installing Fabric API...";
-            await EnsureFabricApiAsync(path);
+            await EnsureFabricApiAsync(path, _clientManifest);
 
             StatusText.Text = "Installing Axiom Client...";
-            await EnsureLatestAxiomModAsync(path);
+            await EnsureLatestAxiomModAsync(path, _clientManifest);
 
             StatusText.Text = "Starting Axiom...";
             var options = new MLaunchOption { Session = _session, MaximumRamMb = GetSelectedRamMb() };
@@ -148,18 +147,18 @@ public partial class MainWindow : Window
         }
     }
 
-    private async Task EnsureFabricApiAsync(MinecraftPath path)
+    private async Task EnsureFabricApiAsync(MinecraftPath path, ClientManifest manifest)
     {
         var modsDirectory = Path.Combine(path.BasePath, "mods");
         Directory.CreateDirectory(modsDirectory);
-        var fileName = $"fabric-api-{FabricApiVersion}.jar";
+        var fileName = $"fabric-api-{manifest.FabricApiVersion}.jar";
         var destination = Path.Combine(modsDirectory, fileName);
-        var url = $"https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/{FabricApiVersion}/{fileName}";
+        var url = $"https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/{manifest.FabricApiVersion}/{fileName}";
         if (!File.Exists(destination))
             await DownloadFileAsync(url, destination);
     }
 
-    private async Task EnsureLatestAxiomModAsync(MinecraftPath path)
+    private async Task EnsureLatestAxiomModAsync(MinecraftPath path, ClientManifest manifest)
     {
         var releaseJson = await _httpClient.GetStringAsync(LatestReleaseApi);
         using var document = JsonDocument.Parse(releaseJson);
@@ -170,7 +169,7 @@ public partial class MainWindow : Window
         foreach (var candidate in assets.EnumerateArray())
         {
             if (candidate.TryGetProperty("name", out var name) &&
-                string.Equals(name.GetString(), AxiomAssetName, StringComparison.OrdinalIgnoreCase))
+                string.Equals(name.GetString(), manifest.ClientAsset, StringComparison.OrdinalIgnoreCase))
             {
                 asset = candidate;
                 break;
@@ -178,7 +177,7 @@ public partial class MainWindow : Window
         }
 
         if (asset.ValueKind == JsonValueKind.Undefined)
-            throw new InvalidOperationException("The latest Axiom release does not contain axiom.jar yet.");
+            throw new InvalidOperationException($"The latest Axiom release does not contain {manifest.ClientAsset} yet.");
 
         var downloadUrl = asset.GetProperty("browser_download_url").GetString();
         if (string.IsNullOrWhiteSpace(downloadUrl))
@@ -187,7 +186,7 @@ public partial class MainWindow : Window
         var remoteDigest = asset.TryGetProperty("digest", out var digestElement) ? digestElement.GetString() : null;
         var modsDirectory = Path.Combine(path.BasePath, "mods");
         Directory.CreateDirectory(modsDirectory);
-        var destination = Path.Combine(modsDirectory, AxiomAssetName);
+        var destination = Path.Combine(modsDirectory, manifest.ClientAsset);
 
         if (!string.IsNullOrWhiteSpace(remoteDigest) && File.Exists(destination))
         {
@@ -209,6 +208,42 @@ public partial class MainWindow : Window
                 throw new InvalidOperationException("The downloaded Axiom client failed its SHA-256 integrity check.");
             }
         }
+    }
+
+    private async Task<ClientManifest> LoadClientManifestAsync()
+    {
+        var releaseJson = await _httpClient.GetStringAsync(LatestReleaseApi);
+        using var document = JsonDocument.Parse(releaseJson);
+        if (!document.RootElement.TryGetProperty("assets", out var assets))
+            throw new InvalidOperationException("The latest Axiom release has no assets.");
+
+        JsonElement asset = default;
+        foreach (var candidate in assets.EnumerateArray())
+        {
+            if (candidate.TryGetProperty("name", out var name) &&
+                string.Equals(name.GetString(), ClientManifestAssetName, StringComparison.OrdinalIgnoreCase))
+            {
+                asset = candidate;
+                break;
+            }
+        }
+
+        if (asset.ValueKind == JsonValueKind.Undefined)
+            throw new InvalidOperationException("The latest Axiom release is missing its client manifest.");
+
+        var downloadUrl = asset.GetProperty("browser_download_url").GetString();
+        if (string.IsNullOrWhiteSpace(downloadUrl))
+            throw new InvalidOperationException("The Axiom client manifest has no download URL.");
+
+        var manifestJson = await _httpClient.GetStringAsync(downloadUrl);
+        var manifest = JsonSerializer.Deserialize<ClientManifest>(manifestJson);
+        if (manifest == null || string.IsNullOrWhiteSpace(manifest.MinecraftVersion) ||
+            string.IsNullOrWhiteSpace(manifest.FabricLoaderVersion) ||
+            string.IsNullOrWhiteSpace(manifest.FabricApiVersion) ||
+            string.IsNullOrWhiteSpace(manifest.ClientAsset))
+            throw new InvalidOperationException("The Axiom client manifest is invalid.");
+
+        return manifest;
     }
 
     private async Task DownloadFileAsync(string url, string destination)
@@ -409,6 +444,16 @@ public partial class MainWindow : Window
             }
             catch { }
         }
+    }
+
+    private sealed class ClientManifest
+    {
+        public string ClientVersion { get; set; } = "0.1.0";
+        public string MinecraftVersion { get; set; } = string.Empty;
+        public string FabricLoaderVersion { get; set; } = string.Empty;
+        public string FabricApiVersion { get; set; } = string.Empty;
+        public string ClientAsset { get; set; } = string.Empty;
+        public string LauncherAsset { get; set; } = string.Empty;
     }
 
     private sealed class LauncherSettings
