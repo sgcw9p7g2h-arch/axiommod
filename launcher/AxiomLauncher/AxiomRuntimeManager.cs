@@ -114,7 +114,7 @@ internal sealed class AxiomRuntimeManager
         return Path.Combine(GetRuntimeDirectory(path), clientAsset);
     }
 
-    public static void StageRuntimeAsset(MinecraftPath path, string runtimeAssetName)
+    public static async Task StageRuntimeAssetAsync(MinecraftPath path, string runtimeAssetName)
     {
         var runtimeAsset = GetRuntimeAssetPath(path, runtimeAssetName);
         if (!File.Exists(runtimeAsset))
@@ -124,8 +124,27 @@ internal sealed class AxiomRuntimeManager
         Directory.CreateDirectory(modsDirectory);
         var destination = GetClientAssetPath(path, runtimeAssetName);
         var temporary = destination + ".stage";
-        File.Copy(runtimeAsset, temporary, true);
-        File.Move(temporary, destination, true);
+        try
+        {
+            File.Copy(runtimeAsset, temporary, true);
+            File.Move(temporary, destination, true);
+
+            var sourceDigest = await ComputeSha256Async(runtimeAsset);
+            var stagedDigest = await ComputeSha256Async(destination);
+            if (!string.Equals(sourceDigest, stagedDigest, StringComparison.OrdinalIgnoreCase))
+                throw new IOException("The staged Axiom runtime asset failed its integrity check.");
+        }
+        catch
+        {
+            try
+            {
+                if (File.Exists(temporary))
+                    File.Delete(temporary);
+            }
+            catch { }
+
+            throw;
+        }
     }
 
     public static string GetRuntimeDirectory(MinecraftPath path) =>
