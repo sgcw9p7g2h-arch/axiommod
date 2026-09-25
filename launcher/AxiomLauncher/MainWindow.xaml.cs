@@ -268,7 +268,7 @@ public partial class MainWindow : Window
 
     private static bool IsSafeAssetName(string value) =>
         !string.IsNullOrWhiteSpace(value) &&
-        value.IndexOfAny(new[] { '/', '\' }) < 0 &&
+        value.IndexOfAny(new[] { '/', '\\' }) < 0 &&
         value != "." &&
         value != "..";
 
