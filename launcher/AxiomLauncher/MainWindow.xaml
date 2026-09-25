@@ -49,7 +49,7 @@
               <Grid Margin="0,8,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="GameDirBox" Height="38"/><Button Grid.Column="1" Content="BROWSE" Margin="10,0,0,0" Padding="14,8" Click="BrowseGameDirectoryButton_Click"/><Button Grid.Column="2" Content="OPEN" Margin="8,0,0,0" Padding="14,8" Click="OpenGameDirectoryButton_Click"/></Grid>
               <TextBlock x:Name="AccountText" Text="Not signed in" Foreground="{StaticResource AxiomMuted}" Margin="0,14,0,0"/>
             </StackPanel>
-            <Button Grid.Row="4" x:Name="LaunchButton" Content="LAUNCH AXIOM" Height="52" FontSize="16" FontWeight="Bold" Click="LaunchButton_Click"/>
+            <Grid Grid.Row="4"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><Button x:Name="LaunchButton" Content="LAUNCH AXIOM" Height="52" FontSize="16" FontWeight="Bold" Click="LaunchButton_Click"/><Button Grid.Column="1" x:Name="RepairButton" Content="REPAIR" Height="52" Margin="10,0,0,0" Padding="18,0" Click="RepairButton_Click"/></Grid>
           </Grid>
         </Border>
       </TabItem>
