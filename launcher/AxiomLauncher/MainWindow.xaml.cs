@@ -274,6 +274,27 @@ public partial class MainWindow : Window
         }
     }
 
+    private async Task WriteRuntimeStateAsync(MinecraftPath path, ClientManifest manifest)
+    {
+        if (!IsSafeAssetName(manifest.ClientAsset))
+            throw new InvalidOperationException("The Axiom client asset name is invalid.");
+
+        var assetPath = Path.Combine(path.BasePath, "mods", manifest.ClientAsset);
+        if (!File.Exists(assetPath))
+            throw new InvalidOperationException("The Axiom client asset is missing after installation.");
+
+        var digest = await ComputeSha256Async(assetPath);
+        var state = ClientRuntimeState.FromManifest(
+            manifest.ClientVersion,
+            manifest.MinecraftVersion,
+            manifest.FabricLoaderVersion,
+            manifest.FabricApiVersion,
+            manifest.ClientAsset,
+            digest);
+
+        await state.SaveAsync(Path.Combine(path.BasePath, ".axiom", "client-state.json"));
+    }
+
     private async Task<ClientManifest> LoadClientManifestAsync()
     {
         var releaseJson = await _httpClient.GetStringAsync(LatestReleaseApi);
