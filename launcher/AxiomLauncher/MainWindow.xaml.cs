@@ -209,8 +209,9 @@ public partial class MainWindow : Window
                 new AxiomGameLaunchRequest(
                     gameDirectory,
                     fabricVersionName,
-                    _session.Username,
-                    _session.AccessToken,
+                    _session.Username ?? throw new InvalidOperationException("Microsoft session username is missing."),
+                    _session.AccessToken ?? throw new InvalidOperationException("Microsoft session access token is missing."),
+                    _session.UUID ?? throw new InvalidOperationException("Microsoft session UUID is missing."),
                     GetSelectedRamMb()));
             process.Start();
 
