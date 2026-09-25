@@ -35,7 +35,11 @@ public final class OnlineSchematicService {
         String url="https://raw.githubusercontent.com/"+r.repo()+"/"+r.branch()+"/"+r.path().replace(" ","%20");
         HttpRequest req=HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(20)).header("User-Agent","Axiom-Minecraft-Mod").GET().build();
         HttpResponse<byte[]> res=http.send(req,HttpResponse.BodyHandlers.ofByteArray()); if(res.statusCode()!=200)throw new IOException("Download failed: HTTP "+res.statusCode());
-        if(res.body().length>32*1024*1024)throw new IOException("Schematic is larger than 32 MB"); Files.write(out,res.body(),StandardOpenOption.CREATE,StandardOpenOption.TRUNCATE_EXISTING); return out;
+        if(res.body().length>32*1024*1024)throw new IOException("Schematic is larger than 32 MB"); Path tmp=out.resolveSibling(out.getFileName()+".download");
+        try { Files.write(tmp,res.body(),StandardOpenOption.CREATE,StandardOpenOption.TRUNCATE_EXISTING); Files.move(tmp,out,StandardCopyOption.REPLACE_EXISTING,StandardCopyOption.ATOMIC_MOVE); }
+        catch(AtomicMoveNotSupportedException e){ Files.move(tmp,out,StandardCopyOption.REPLACE_EXISTING); }
+        catch(IOException e){ try{Files.deleteIfExists(tmp);}catch(IOException ignored){} throw e; }
+        return out;
     }
     public SchematicEngine importDownloaded(Path path) throws IOException{return new LitematicImporter().load(path);}
     private String get(String url) throws IOException,InterruptedException { HttpRequest r=HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(10)).header("Accept","application/vnd.github+json").header("User-Agent","Axiom-Minecraft-Mod").GET().build(); HttpResponse<String> x=http.send(r,HttpResponse.BodyHandlers.ofString()); if(x.statusCode()!=200)throw new IOException("Online search failed: HTTP "+x.statusCode()); return x.body(); }
